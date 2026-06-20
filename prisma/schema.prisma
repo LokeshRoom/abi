@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  passwordHash  String?
+  role          Role      @default(CLIENT)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions      Session[]
+  galleries     GalleryAccess[]
+  selections    PhotoSelection[]
+  bookings      Booking[]
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id     String  @id @default(cuid())
+  name   String  @unique
+  slug   String  @unique
+  order  Int     @default(0)
+  photos Photo[]
+}
+
+model Photo {
+  id           String   @id @default(cuid())
+  title        String?
+  description  String?
+  blobUrl      String
+  blurDataUrl  String?
+  width        Int
+  height       Int
+  // EXIF metadata
+  camera       String?
+  lens         String?
+  focalLength  String?
+  aperture     String?
+  shutterSpeed String?
+  iso          String?
+  dateTaken    DateTime?
+  // Organization
+  categoryId   String?
+  category     Category?  @relation(fields: [categoryId], references: [id])
+  galleryId    String?
+  gallery      Gallery?   @relation(fields: [galleryId], references: [id])
+  isFeatured   Boolean    @default(false)
+  isPublic     Boolean    @default(true)
+  order        Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  selections   PhotoSelection[]
+
+  @@index([categoryId])
+  @@index([galleryId])
+  @@index([isFeatured])
+}
+
+model Gallery {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String?
+  coverUrl    String?
+  isPublic    Boolean  @default(false)
+  password    String?
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  photos      Photo[]
+  access      GalleryAccess[]
+}
+
+model GalleryAccess {
+  id        String  @id @default(cuid())
+  userId    String
+  galleryId String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gallery   Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, galleryId])
+}
+
+model PhotoSelection {
+  id        String   @id @default(cuid())
+  userId    String
+  photoId   String
+  note      String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photo     Photo    @relation(fields: [photoId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, photoId])
+}
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String?
+  content     String
+  coverImage  String?
+  published   Boolean  @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  role      String?
+  content   String
+  avatar    String?
+  rating    Int      @default(5)
+  featured  Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Booking {
+  id          String        @id @default(cuid())
+  userId      String?
+  user        User?         @relation(fields: [userId], references: [id])
+  name        String
+  email       String
+  phone       String?
+  eventType   String
+  eventDate   DateTime
+  location    String?
+  message     String?
+  status      BookingStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}

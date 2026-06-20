@@ -1,26 +1,268 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ═══════════════════════════════════════════════════════
+   ABI PHOTO STUDIO — DUAL-MODE THEMING SYSTEM
+   Gallery Mode: Neutral, photos-first. No brand color.
+   Brand Mode: Vibrant orange/green/blue energy.
+═══════════════════════════════════════════════════════ */
+
+/* ═══ Custom Font Faces for numbers on viewfinder ═══ */
+@theme {
+  --font-outfit: 'Outfit', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --color-brand-orange: #E8632B;
+  --color-brand-green: #A8D841;
+  --color-brand-blue: #3B5DAA;
+  --color-brand-black: #0A0A0A;
+  --color-brand-white: #FAFAFA;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+/* ═══ BASE LAYER ═══ */
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* ═══ GALLERY MODE (default) ═══ */
+    --bg-primary: #0A0A0A;
+    --bg-secondary: #111111;
+    --bg-card: #1A1A1A;
+    --bg-card-hover: #222222;
+    --border: #2A2A2A;
+    --border-hover: #3A3A3A;
+    --text-primary: #FAFAFA;
+    --text-secondary: #888888;
+    --text-muted: #555555;
+    --accent: #FAFAFA;
+    --accent-secondary: #888888;
+    --accent-glow: transparent;
+    --accent-glow-strong: transparent;
+    --overlay-gradient: linear-gradient(135deg, transparent, transparent);
+    --neon-text-shadow: none;
+
+    /* ═══ Fluid Type Scale ═══ */
+    --text-xs: clamp(0.694rem, 0.66rem + 0.18vw, 0.8rem);
+    --text-sm: clamp(0.833rem, 0.78rem + 0.27vw, 1rem);
+    --text-base: clamp(1rem, 0.93rem + 0.36vw, 1.25rem);
+    --text-lg: clamp(1.2rem, 1.1rem + 0.5vw, 1.563rem);
+    --text-xl: clamp(1.44rem, 1.3rem + 0.7vw, 1.953rem);
+    --text-2xl: clamp(1.728rem, 1.52rem + 1.04vw, 2.441rem);
+    --text-3xl: clamp(2.074rem, 1.77rem + 1.52vw, 3.052rem);
+    --text-hero: clamp(3rem, 2.2rem + 4vw, 7rem);
+
+    /* ═══ Spacing ═══ */
+    --section-padding: clamp(3rem, 5vw, 8rem);
+    --container-max: 1400px;
+
+    /* ═══ Animation Timings ═══ */
+    --transition-fast: 150ms;
+    --transition-base: 250ms;
+    --transition-slow: 400ms;
+    --transition-cinematic: 800ms;
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out-circ: cubic-bezier(0.85, 0, 0.15, 1);
+  }
+
+  /* ═══ BRAND MODE ═══ */
+  [data-theme="brand"] {
+    --bg-primary: #0A0A0A;
+    --bg-secondary: #1A0E08;
+    --bg-card: #1A1A1A;
+    --bg-card-hover: #251A12;
+    --border: rgba(232, 99, 43, 0.2);
+    --border-hover: rgba(232, 99, 43, 0.4);
+    --text-primary: #FAFAFA;
+    --text-secondary: #CCCCCC;
+    --text-muted: #888888;
+    --accent: #E8632B;
+    --accent-secondary: #A8D841;
+    --accent-glow: rgba(232, 99, 43, 0.25);
+    --accent-glow-strong: rgba(232, 99, 43, 0.5);
+    --overlay-gradient: linear-gradient(135deg, rgba(232, 99, 43, 0.08), rgba(59, 93, 170, 0.06), rgba(168, 216, 65, 0.04));
+    --neon-text-shadow: 0 0 20px rgba(232, 99, 43, 0.5), 0 0 40px rgba(232, 99, 43, 0.25);
+  }
+
+  /* ═══ Global Reset & Base ═══ */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    font-family: var(--font-outfit);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ═══ Selection styling ═══ */
+  ::selection {
+    background: rgba(232, 99, 43, 0.3);
+    color: #FAFAFA;
+  }
+
+  /* ═══ Scrollbar ═══ */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ═══ UTILITY LAYER ═══ */
+@layer utilities {
+  /* ═══ Neon Glow Effects ═══ */
+  .glow-orange {
+    box-shadow: 0 0 15px rgba(232, 99, 43, 0.3), 0 0 30px rgba(232, 99, 43, 0.15);
+  }
+  .glow-green {
+    box-shadow: 0 0 15px rgba(168, 216, 65, 0.3), 0 0 30px rgba(168, 216, 65, 0.15);
+  }
+  .glow-blue {
+    box-shadow: 0 0 15px rgba(59, 93, 170, 0.3), 0 0 30px rgba(59, 93, 170, 0.15);
+  }
+  .text-glow-orange {
+    text-shadow: 0 0 20px rgba(232, 99, 43, 0.5), 0 0 40px rgba(232, 99, 43, 0.25);
+  }
+
+  /* ═══ Grain Overlay ═══ */
+  .film-grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.03;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  }
+
+  /* ═══ Viewfinder Corners ═══ */
+  .viewfinder-corner {
+    position: relative;
+  }
+  .viewfinder-corner::before,
+  .viewfinder-corner::after {
+    content: '';
+    position: absolute;
+    border-color: var(--accent);
+    border-style: solid;
+    width: 20px;
+    height: 20px;
+    opacity: 0;
+    transition: opacity var(--transition-base) ease;
+  }
+  .viewfinder-corner:hover::before,
+  .viewfinder-corner:hover::after {
+    opacity: 1;
+  }
+  .viewfinder-corner::before {
+    top: 8px;
+    left: 8px;
+    border-width: 2px 0 0 2px;
+  }
+  .viewfinder-corner::after {
+    bottom: 8px;
+    right: 8px;
+    border-width: 0 2px 2px 0;
+  }
+
+  /* ═══ Mechanical Text ═══ */
+  .font-technical {
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: var(--text-xs);
+  }
+
+  /* ═══ Container ═══ */
+  .container-abi {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 3vw, 2rem);
+  }
+}
+
+/* ═══ ANIMATION LAYER ═══ */
+@layer utilities {
+  /* ═══ Scan Line Effect ═══ */
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
+  .scanline-effect::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(168, 216, 65, 0.03) 50%,
+      transparent 100%
+    );
+    height: 30%;
+    animation: scanline 8s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ═══ Neon Flicker ═══ */
+  @keyframes neonFlicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+      opacity: 1;
+      filter: brightness(1);
+    }
+    20%, 24%, 55% {
+      opacity: 0.6;
+      filter: brightness(0.6);
+    }
+  }
+  .neon-flicker {
+    animation: neonFlicker 3s infinite;
+  }
+
+  /* ═══ Pulse Glow ═══ */
+  @keyframes pulseGlow {
+    0%, 100% { box-shadow: 0 0 5px rgba(232, 99, 43, 0.2); }
+    50% { box-shadow: 0 0 20px rgba(232, 99, 43, 0.4), 0 0 40px rgba(232, 99, 43, 0.2); }
+  }
+  .pulse-glow {
+    animation: pulseGlow 3s ease-in-out infinite;
+  }
+
+  /* ═══ Typewriter Effect ═══ */
+  @keyframes typewriter {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+  .typewriter {
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typewriter 1s steps(20) forwards;
+  }
+
+  /* ═══ Reduced Motion ═══ */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    .scanline-effect::before {
+      display: none;
+    }
+  }
 }
