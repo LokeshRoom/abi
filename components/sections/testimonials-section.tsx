@@ -10,7 +10,7 @@ interface Testimonial {
   rating: number;
 }
 
-const TESTIMONIALS: Testimonial[] = [
+const DEFAULT_TESTIMONIALS: Testimonial[] = [
   {
     quote:
       "Abi captured our wedding day with such artistry. Every frame tells a story we'll cherish forever. His eye for those fleeting, candid moments is truly extraordinary.",
@@ -43,13 +43,45 @@ const TESTIMONIALS: Testimonial[] = [
 
 export function TestimonialsSection() {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  useEffect(() => {
+    async function loadTestimonials() {
+      try {
+        const res = await fetch("/api/testimonials");
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.length > 0) {
+            // Filter and map to display
+            const featuredData = data
+              .filter((t: any) => t.featured)
+              .map((t: any) => ({
+                quote: t.content,
+                name: t.name,
+                role: t.role || "Client",
+                rating: t.rating,
+              }));
+            
+            if (featuredData.length > 0) {
+              setTestimonials(featuredData);
+              return;
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error loading testimonials:", error);
+      }
+      setTestimonials(DEFAULT_TESTIMONIALS);
+    }
+    loadTestimonials();
+  }, []);
+
   const scrollToIndex = useCallback((index: number) => {
     const container = scrollRef.current;
-    if (!container) return;
+    if (!container || testimonials.length === 0) return;
     const cards = container.querySelectorAll<HTMLElement>("[data-card]");
     if (cards[index]) {
       const cardLeft = cards[index].offsetLeft;
@@ -60,14 +92,14 @@ export function TestimonialsSection() {
         behavior: "smooth",
       });
     }
-  }, []);
+  }, [testimonials]);
 
   // Auto-scroll
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || testimonials.length === 0) return;
     intervalRef.current = setInterval(() => {
       setActiveIndex((prev) => {
-        const next = (prev + 1) % TESTIMONIALS.length;
+        const next = (prev + 1) % testimonials.length;
         scrollToIndex(next);
         return next;
       });
@@ -75,7 +107,8 @@ export function TestimonialsSection() {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [isPaused, scrollToIndex]);
+  }, [isPaused, scrollToIndex, testimonials.length]);
+
 
   // Track scroll position to update dots
   useEffect(() => {
@@ -130,7 +163,7 @@ export function TestimonialsSection() {
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
-        {TESTIMONIALS.map((t, i) => (
+        {testimonials.map((t, i) => (
           <div
             key={i}
             data-card
@@ -184,7 +217,7 @@ export function TestimonialsSection() {
 
       {/* ═══ Dot indicators ═══ */}
       <div className="mt-8 flex justify-center gap-2">
-        {TESTIMONIALS.map((_, i) => (
+        {testimonials.map((_, i) => (
           <button
             key={i}
             onClick={() => {

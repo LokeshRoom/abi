@@ -16,6 +16,8 @@ const eventTypes = [
 
 export default function BookingPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -26,10 +28,28 @@ export default function BookingPage() {
     message: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Booking form submitted:", formData);
-    setIsSubmitted(true);
+    setIsSubmitting(true);
+    setSubmitError("");
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || "Failed to submit booking request");
+      }
+
+      setIsSubmitted(true);
+    } catch (err: any) {
+      setSubmitError(err.message || "Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (
@@ -104,7 +124,6 @@ export default function BookingPage() {
           </p>
         </motion.div>
 
-        {/* Form */}
         <motion.form
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -112,6 +131,11 @@ export default function BookingPage() {
           onSubmit={handleSubmit}
           className="max-w-2xl mx-auto space-y-6"
         >
+          {submitError && (
+            <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-lg text-sm text-center">
+              {submitError}
+            </div>
+          )}
           {/* Name + Email Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -315,12 +339,12 @@ export default function BookingPage() {
             />
           </div>
 
-          {/* Submit */}
           <motion.button
             type="submit"
-            whileHover={{ scale: 1.02, boxShadow: "0 0 30px rgba(232, 99, 43, 0.4)" }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full py-4 rounded-lg font-semibold text-white flex items-center justify-center gap-2 transition-all duration-300"
+            disabled={isSubmitting}
+            whileHover={isSubmitting ? {} : { scale: 1.02, boxShadow: "0 0 30px rgba(232, 99, 43, 0.4)" }}
+            whileTap={isSubmitting ? {} : { scale: 0.98 }}
+            className="w-full py-4 rounded-lg font-semibold text-white flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             style={{
               background: "linear-gradient(135deg, #E8632B, #D4551F)",
               fontFamily: "var(--font-outfit)",
@@ -328,7 +352,7 @@ export default function BookingPage() {
             }}
           >
             <Send className="w-5 h-5" />
-            Send Booking Request
+            {isSubmitting ? "Submitting Request..." : "Send Booking Request"}
           </motion.button>
 
           <p

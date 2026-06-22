@@ -40,6 +40,52 @@ async function main() {
   }
 
   console.log("Categories seeded");
+
+  // Create default testimonials
+  const testimonials = [
+    {
+      id: "seed-t1",
+      name: "Priya & Karthik",
+      role: "Wedding Client",
+      content: "Abi captured our wedding day with such artistry. Every frame tells a story we'll cherish forever. His eye for those fleeting, candid moments is truly extraordinary.",
+      rating: 5,
+      featured: true,
+    },
+    {
+      id: "seed-t2",
+      name: "Deepa Ramasamy",
+      role: "Portrait Client",
+      content: "The portrait session exceeded all expectations. The lighting, composition, and post-processing were absolutely flawless. I've never felt more confident in photos.",
+      rating: 5,
+      featured: true,
+    },
+    {
+      id: "seed-t3",
+      name: "Arjun Menon",
+      role: "Creative Director, Lunar Co.",
+      content: "Working with Abi on our brand campaign was seamless. He understood our vision instantly and delivered images that elevated our entire brand identity.",
+      rating: 5,
+      featured: true,
+    },
+    {
+      id: "seed-t4",
+      name: "Meera Suresh",
+      role: "Event Organizer",
+      content: "His cinematic approach to event photography is unmatched. Every photo feels like a still from a film — dramatic, emotional, and perfectly timed.",
+      rating: 5,
+      featured: true,
+    },
+  ];
+
+  for (const testimonial of testimonials) {
+    await prisma.testimonial.upsert({
+      where: { id: testimonial.id },
+      update: {},
+      create: testimonial,
+    });
+  }
+
+  console.log("Testimonials seeded");
 }
 
 main()

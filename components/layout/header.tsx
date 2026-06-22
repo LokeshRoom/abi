@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -9,17 +10,27 @@ import { NAV_ITEMS } from "@/lib/constants";
 import { MobileNav } from "@/components/layout/mobile-nav";
 
 export function Header() {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const isAdminOrGalleryOrLogin =
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/gallery") ||
+    pathname === "/login";
+
   useEffect(() => {
+    if (isAdminOrGalleryOrLogin) return;
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isAdminOrGalleryOrLogin]);
+
+  if (isAdminOrGalleryOrLogin) return null;
+
 
   return (
     <>

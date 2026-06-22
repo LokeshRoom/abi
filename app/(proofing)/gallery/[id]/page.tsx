@@ -7,7 +7,7 @@ import { authOptions } from "@/lib/auth";
 export default async function ClientGalleryPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const session = await getServerSession(authOptions);
   
@@ -15,12 +15,14 @@ export default async function ClientGalleryPage({
     return null;
   }
 
+  const { id } = await params;
+
   // Find gallery by slug or ID
   const gallery = await prisma.gallery.findFirst({
     where: {
       OR: [
-        { id: params.id },
-        { slug: params.id }
+        { id },
+        { slug: id }
       ]
     },
     include: {

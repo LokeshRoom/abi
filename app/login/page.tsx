@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/gallery";
+  const callbackUrl = searchParams.get("callbackUrl") || "/admin/dashboard";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,9 +30,15 @@ export default function LoginPage() {
       setError("Invalid email or password");
       setLoading(false);
     } else {
-      router.push(callbackUrl);
+      const session = await getSession();
+      if (session?.user?.role === "ADMIN") {
+        router.push("/admin/dashboard");
+      } else {
+        router.push(callbackUrl === "/gallery" ? "/" : callbackUrl);
+      }
     }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)] p-4 film-grain">

@@ -1,8 +1,19 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { NAV_ITEMS, SITE } from "@/lib/constants";
 
 export function Footer() {
+  const pathname = usePathname();
   const currentYear = new Date().getFullYear();
+
+  const isAdminOrGalleryOrLogin =
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/gallery") ||
+    pathname === "/login";
+
+  if (isAdminOrGalleryOrLogin) return null;
 
   return (
     <footer

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import { SITE } from "@/lib/constants";
@@ -12,6 +13,9 @@ interface ContactFormData {
 }
 
 export default function ContactPage() {
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
   const {
     register,
     handleSubmit,
@@ -19,9 +23,25 @@ export default function ContactPage() {
     reset,
   } = useForm<ContactFormData>();
 
-  const onSubmit = (data: ContactFormData) => {
-    console.log("Contact form submitted:", data);
-    reset();
+  const onSubmit = async (data: ContactFormData) => {
+    try {
+      setSubmitError("");
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || "Failed to send message");
+      }
+
+      setIsSubmitted(true);
+      reset();
+    } catch (err: any) {
+      setSubmitError(err.message || "Something went wrong. Please try again.");
+    }
   };
 
   return (
@@ -46,183 +66,208 @@ export default function ContactPage() {
         <div className="grid gap-12 lg:grid-cols-5 lg:gap-16">
           {/* ═══ Contact form ═══ */}
           <div className="lg:col-span-3">
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="flex flex-col gap-6"
-              noValidate
-            >
-              {/* Name */}
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="name"
-                  className="font-technical text-xs tracking-[0.1em]"
-                  style={{ color: "var(--text-secondary)" }}
+            {isSubmitted ? (
+              <div className="flex flex-col items-center justify-center p-8 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] text-center h-full min-h-[300px]">
+                <svg className="w-16 h-16 mb-6 text-[#A8D841]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 className="text-xl font-bold mb-3" style={{ fontFamily: "var(--font-outfit)" }}>Message Sent!</h3>
+                <p className="text-sm text-[var(--text-secondary)] mb-8 max-w-sm" style={{ fontFamily: "var(--font-outfit)" }}>
+                  Thank you for reaching out. I have received your message and will respond within 24 hours.
+                </p>
+                <button
+                  onClick={() => setIsSubmitted(false)}
+                  className="px-6 py-3 bg-[var(--accent)] text-[var(--bg-primary)] font-semibold rounded-lg text-sm hover:shadow-[0_0_15px_var(--accent-glow)] transition-all cursor-pointer"
+                  style={{ fontFamily: "var(--font-outfit)" }}
                 >
-                  NAME
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  placeholder="Your name"
-                  className={cn(
-                    "rounded-lg border px-4 py-3 text-sm outline-none",
-                    "transition-all duration-[var(--transition-base)]",
-                    "placeholder:text-[var(--text-muted)]",
-                    "focus:border-[var(--accent)] focus:shadow-[0_0_15px_var(--accent-glow)]",
-                    errors.name && "border-red-500"
-                  )}
-                  style={{
-                    backgroundColor: "var(--bg-card)",
-                    borderColor: errors.name ? undefined : "var(--border)",
-                    color: "var(--text-primary)",
-                  }}
-                  {...register("name", { required: "Name is required" })}
-                />
-                {errors.name && (
-                  <span className="text-xs text-red-400">
-                    {errors.name.message}
-                  </span>
-                )}
+                  Send Another Message
+                </button>
               </div>
-
-              {/* Email */}
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="email"
-                  className="font-technical text-xs tracking-[0.1em]"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  EMAIL
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="your@email.com"
-                  className={cn(
-                    "rounded-lg border px-4 py-3 text-sm outline-none",
-                    "transition-all duration-[var(--transition-base)]",
-                    "placeholder:text-[var(--text-muted)]",
-                    "focus:border-[var(--accent)] focus:shadow-[0_0_15px_var(--accent-glow)]",
-                    errors.email && "border-red-500"
-                  )}
-                  style={{
-                    backgroundColor: "var(--bg-card)",
-                    borderColor: errors.email ? undefined : "var(--border)",
-                    color: "var(--text-primary)",
-                  }}
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: "Please enter a valid email",
-                    },
-                  })}
-                />
-                {errors.email && (
-                  <span className="text-xs text-red-400">
-                    {errors.email.message}
-                  </span>
-                )}
-              </div>
-
-              {/* Subject */}
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="subject"
-                  className="font-technical text-xs tracking-[0.1em]"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  SUBJECT
-                </label>
-                <input
-                  id="subject"
-                  type="text"
-                  placeholder="What's this about?"
-                  className={cn(
-                    "rounded-lg border px-4 py-3 text-sm outline-none",
-                    "transition-all duration-[var(--transition-base)]",
-                    "placeholder:text-[var(--text-muted)]",
-                    "focus:border-[var(--accent)] focus:shadow-[0_0_15px_var(--accent-glow)]",
-                    errors.subject && "border-red-500"
-                  )}
-                  style={{
-                    backgroundColor: "var(--bg-card)",
-                    borderColor: errors.subject ? undefined : "var(--border)",
-                    color: "var(--text-primary)",
-                  }}
-                  {...register("subject", {
-                    required: "Subject is required",
-                  })}
-                />
-                {errors.subject && (
-                  <span className="text-xs text-red-400">
-                    {errors.subject.message}
-                  </span>
-                )}
-              </div>
-
-              {/* Message */}
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="message"
-                  className="font-technical text-xs tracking-[0.1em]"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  MESSAGE
-                </label>
-                <textarea
-                  id="message"
-                  rows={6}
-                  placeholder="Tell me about your project or vision..."
-                  className={cn(
-                    "resize-none rounded-lg border px-4 py-3 text-sm outline-none",
-                    "transition-all duration-[var(--transition-base)]",
-                    "placeholder:text-[var(--text-muted)]",
-                    "focus:border-[var(--accent)] focus:shadow-[0_0_15px_var(--accent-glow)]",
-                    errors.message && "border-red-500"
-                  )}
-                  style={{
-                    backgroundColor: "var(--bg-card)",
-                    borderColor: errors.message ? undefined : "var(--border)",
-                    color: "var(--text-primary)",
-                  }}
-                  {...register("message", {
-                    required: "Message is required",
-                    minLength: {
-                      value: 10,
-                      message: "Please write at least 10 characters",
-                    },
-                  })}
-                />
-                {errors.message && (
-                  <span className="text-xs text-red-400">
-                    {errors.message.message}
-                  </span>
-                )}
-              </div>
-
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className={cn(
-                  "group relative inline-flex items-center justify-center gap-2 rounded-lg px-8 py-3",
-                  "text-sm font-semibold tracking-wide",
-                  "transition-all duration-[var(--transition-base)]",
-                  "hover:shadow-[0_0_30px_rgba(232,99,43,0.3)]",
-                  "disabled:opacity-50 disabled:cursor-not-allowed"
-                )}
-                style={{
-                  backgroundColor: "var(--accent)",
-                  color: "var(--bg-primary)",
-                }}
+            ) : (
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="flex flex-col gap-6"
+                noValidate
               >
-                {isSubmitting ? "Sending..." : "Send Message"}
-                <span className="inline-block transition-transform duration-[var(--transition-base)] group-hover:translate-x-1">
-                  →
-                </span>
-              </button>
-            </form>
+                {submitError && (
+                  <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-lg text-sm text-center">
+                    {submitError}
+                  </div>
+                )}
+
+                {/* Name */}
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="name"
+                    className="font-technical text-xs tracking-[0.1em]"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    NAME
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    placeholder="Your name"
+                    className={cn(
+                      "rounded-lg border px-4 py-3 text-sm outline-none",
+                      "transition-all duration-[var(--transition-base)]",
+                      "placeholder:text-[var(--text-muted)]",
+                      "focus:border-[var(--accent)] focus:shadow-[0_0_15px_var(--accent-glow)]",
+                      errors.name && "border-red-500"
+                    )}
+                    style={{
+                      backgroundColor: "var(--bg-card)",
+                      borderColor: errors.name ? undefined : "var(--border)",
+                      color: "var(--text-primary)",
+                    }}
+                    {...register("name", { required: "Name is required" })}
+                  />
+                  {errors.name && (
+                    <span className="text-xs text-red-400">
+                      {errors.name.message}
+                    </span>
+                  )}
+                </div>
+
+                {/* Email */}
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="email"
+                    className="font-technical text-xs tracking-[0.1em]"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    EMAIL
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    className={cn(
+                      "rounded-lg border px-4 py-3 text-sm outline-none",
+                      "transition-all duration-[var(--transition-base)]",
+                      "placeholder:text-[var(--text-muted)]",
+                      "focus:border-[var(--accent)] focus:shadow-[0_0_15px_var(--accent-glow)]",
+                      errors.email && "border-red-500"
+                    )}
+                    style={{
+                      backgroundColor: "var(--bg-card)",
+                      borderColor: errors.email ? undefined : "var(--border)",
+                      color: "var(--text-primary)",
+                    }}
+                    {...register("email", {
+                      required: "Email is required",
+                      pattern: {
+                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                        message: "Please enter a valid email",
+                      },
+                    })}
+                  />
+                  {errors.email && (
+                    <span className="text-xs text-red-400">
+                      {errors.email.message}
+                    </span>
+                  )}
+                </div>
+
+                {/* Subject */}
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="subject"
+                    className="font-technical text-xs tracking-[0.1em]"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    SUBJECT
+                  </label>
+                  <input
+                    id="subject"
+                    type="text"
+                    placeholder="What's this about?"
+                    className={cn(
+                      "rounded-lg border px-4 py-3 text-sm outline-none",
+                      "transition-all duration-[var(--transition-base)]",
+                      "placeholder:text-[var(--text-muted)]",
+                      "focus:border-[var(--accent)] focus:shadow-[0_0_15px_var(--accent-glow)]",
+                      errors.subject && "border-red-500"
+                    )}
+                    style={{
+                      backgroundColor: "var(--bg-card)",
+                      borderColor: errors.subject ? undefined : "var(--border)",
+                      color: "var(--text-primary)",
+                    }}
+                    {...register("subject", {
+                      required: "Subject is required",
+                    })}
+                  />
+                  {errors.subject && (
+                    <span className="text-xs text-red-400">
+                      {errors.subject.message}
+                    </span>
+                  )}
+                </div>
+
+                {/* Message */}
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="message"
+                    className="font-technical text-xs tracking-[0.1em]"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    MESSAGE
+                  </label>
+                  <textarea
+                    id="message"
+                    rows={6}
+                    placeholder="Tell me about your project or vision..."
+                    className={cn(
+                      "resize-none rounded-lg border px-4 py-3 text-sm outline-none",
+                      "transition-all duration-[var(--transition-base)]",
+                      "placeholder:text-[var(--text-muted)]",
+                      "focus:border-[var(--accent)] focus:shadow-[0_0_15px_var(--accent-glow)]",
+                      errors.message && "border-red-500"
+                    )}
+                    style={{
+                      backgroundColor: "var(--bg-card)",
+                      borderColor: errors.message ? undefined : "var(--border)",
+                      color: "var(--text-primary)",
+                    }}
+                    {...register("message", {
+                      required: "Message is required",
+                      minLength: {
+                        value: 10,
+                        message: "Please write at least 10 characters",
+                      },
+                    })}
+                  />
+                  {errors.message && (
+                    <span className="text-xs text-red-400">
+                      {errors.message.message}
+                    </span>
+                  )}
+                </div>
+
+                {/* Submit */}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={cn(
+                    "group relative inline-flex items-center justify-center gap-2 rounded-lg px-8 py-3",
+                    "text-sm font-semibold tracking-wide",
+                    "transition-all duration-[var(--transition-base)]",
+                    "hover:shadow-[0_0_30px_rgba(232,99,43,0.3)]",
+                    "disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  )}
+                  style={{
+                    backgroundColor: "var(--accent)",
+                    color: "var(--bg-primary)",
+                  }}
+                >
+                  {isSubmitting ? "Sending..." : "Send Message"}
+                  <span className="inline-block transition-transform duration-[var(--transition-base)] group-hover:translate-x-1">
+                    →
+                  </span>
+                </button>
+              </form>
+            )}
           </div>
 
           {/* ═══ Side panel ═══ */}
