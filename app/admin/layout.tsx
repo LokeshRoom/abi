@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import Link from "next/link";
 import { getServerSession, authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { Camera, LayoutDashboard, Users, LogOut, Settings, Calendar, MessageSquare, Star } from "lucide-react";
+import { Camera, LayoutDashboard, Users, LogOut, Settings, Calendar, MessageSquare, Star, Newspaper } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +47,11 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           <Link href="/admin/reviews" className="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-[var(--bg-card)] hover:text-[var(--accent)] transition-colors">
             <Star size={18} className="text-[var(--text-secondary)]" />
             <span className="font-medium text-sm">Reviews</span>
+          </Link>
+
+          <Link href="/admin/blogs" className="flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-[var(--bg-card)] hover:text-[var(--accent)] transition-colors">
+            <Newspaper size={18} className="text-[var(--text-secondary)]" />
+            <span className="font-medium text-sm">Blogs</span>
           </Link>
 
           <p className="px-4 pt-4 pb-2 text-[10px] font-technical tracking-widest text-[var(--text-muted)]">SYSTEM</p>

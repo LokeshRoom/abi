@@ -174,6 +174,23 @@ async function main() {
   }
 
   console.log("Testimonials seeded");
+
+  // 5. Create default blog post
+  await prisma.blogPost.upsert({
+    where: { slug: "welcome-to-abi-photo-studio" },
+    update: {},
+    create: {
+      title: "Welcome to Abi Photo Studio",
+      slug: "welcome-to-abi-photo-studio",
+      excerpt: "Behind the lens, chasing light, and capturing memories. Welcome to my new digital journal.",
+      content: "Hello and welcome!\n\nThis is my new digital journal where I will share stories, photography tips, gear reviews, and snapshots from my shoots.\n\nPhotography is more than just clicking a shutter; it's about freezing a feeling in time. Stay tuned for behind-the-scenes content!",
+      coverImage: "/abishek_insta/002_DWyFIc6AbPy8HUv8dX26KPOB2Ft1pG9Zd3Fqts0.jpg",
+      published: true,
+      publishedAt: new Date(),
+    },
+  });
+
+  console.log("Blog posts seeded");
 }
 
 main()

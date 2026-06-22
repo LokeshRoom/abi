@@ -1,50 +1,36 @@
+import { prisma } from "@/lib/db";
 import { Newspaper } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 
-const demoArticles = [
-  {
-    slug: "behind-the-lens-golden-hour",
-    title: "Behind the Lens: Chasing the Golden Hour",
-    excerpt:
-      "How I plan my shoots around that magical 20-minute window when light becomes pure gold.",
-    date: "June 15, 2026",
-    readTime: "5 min read",
-    cover: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=450&fit=crop",
-  },
-  {
-    slug: "gear-review-rf-85mm",
-    title: "Gear Diary: The RF 85mm f/1.2 — One Year Later",
-    excerpt:
-      "A year of portraits, weddings, and street shots through Canon's crown jewel.",
-    date: "May 28, 2026",
-    readTime: "8 min read",
-    cover: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&h=450&fit=crop",
-  },
-  {
-    slug: "wedding-season-tips",
-    title: "5 Things I Wish I Knew Before My First Wedding Shoot",
-    excerpt:
-      "From backup gear to reading the room — lessons learned the hard way so you don't have to.",
-    date: "May 10, 2026",
-    readTime: "6 min read",
-    cover: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800&h=450&fit=crop",
-  },
-];
+export const dynamic = "force-dynamic";
 
-export default function BlogPage() {
+function getReadTime(content: string) {
+  const wordsPerMinute = 200;
+  const words = content.trim().split(/\s+/).length;
+  return Math.max(1, Math.ceil(words / wordsPerMinute));
+}
+
+export default async function BlogPage() {
+  const posts = await prisma.blogPost.findMany({
+    where: { published: true },
+    orderBy: { publishedAt: "desc" },
+  });
+
   return (
     <main className="min-h-screen pt-28 pb-20" style={{ background: "var(--bg-primary)" }}>
       <div className="container-abi">
         {/* Header */}
         <div className="text-center mb-16">
           <p
-            className="font-technical tracking-[0.3em] mb-4"
+            className="font-technical tracking-[0.3em] mb-4 flex items-center justify-center gap-2"
             style={{ color: "var(--accent)", fontFamily: "var(--font-mono)" }}
           >
-            <Newspaper className="inline-block w-3 h-3 mr-2 -mt-0.5" />
+            <Newspaper size={14} />
             JOURNAL
           </p>
           <h1
-            className="font-bold mb-4"
+            className="font-bold mb-4 font-serif"
             style={{
               fontFamily: "var(--font-outfit)",
               fontSize: "var(--text-3xl)",
@@ -60,65 +46,100 @@ export default function BlogPage() {
               fontFamily: "var(--font-outfit)",
             }}
           >
-            Stories, gear reviews, and insights from the field.
+            Stories, photography tips, and creative insights from my visual journey.
           </p>
         </div>
 
         {/* Articles Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {demoArticles.map((article) => (
-            <article
-              key={article.slug}
-              className="group rounded-xl overflow-hidden border transition-all duration-300 hover:-translate-y-1"
-              style={{
-                background: "var(--bg-card)",
-                borderColor: "var(--border)",
-              }}
-            >
-              {/* Cover Image */}
-              <div className="relative aspect-[16/9] overflow-hidden">
-                <img
-                  src={article.cover}
-                  alt={article.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div
-                  className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                />
-              </div>
+        {posts.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {posts.map((article) => {
+              const readTime = getReadTime(article.content);
+              const formattedDate = article.publishedAt
+                ? new Date(article.publishedAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : new Date(article.createdAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  });
 
-              {/* Content */}
-              <div className="p-6">
-                <div
-                  className="flex items-center gap-3 mb-3 font-technical"
-                  style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}
-                >
-                  <span>{article.date}</span>
-                  <span>•</span>
-                  <span>{article.readTime}</span>
-                </div>
-                <h2
-                  className="text-lg font-semibold mb-2 group-hover:text-[#E8632B] transition-colors duration-300"
+              return (
+                <Link
+                  key={article.slug}
+                  href={`/blog/${article.slug}`}
+                  className="group rounded-xl overflow-hidden border transition-all duration-300 hover:-translate-y-1 block cursor-pointer"
                   style={{
-                    fontFamily: "var(--font-outfit)",
-                    color: "var(--text-primary)",
+                    background: "var(--bg-card)",
+                    borderColor: "var(--border)",
                   }}
                 >
-                  {article.title}
-                </h2>
-                <p
-                  className="text-sm leading-relaxed"
-                  style={{
-                    color: "var(--text-secondary)",
-                    fontFamily: "var(--font-outfit)",
-                  }}
-                >
-                  {article.excerpt}
-                </p>
-              </div>
-            </article>
-          ))}
-        </div>
+                  {/* Cover Image */}
+                  <div className="relative aspect-[16/9] overflow-hidden bg-[var(--bg-primary)]">
+                    {article.coverImage ? (
+                      <Image
+                        src={article.coverImage}
+                        alt={article.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[var(--text-muted)]">
+                        <Newspaper size={40} />
+                      </div>
+                    )}
+                    <div
+                      className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                    />
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-6">
+                    <div
+                      className="flex items-center gap-3 mb-3 font-technical text-xs"
+                      style={{ color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}
+                    >
+                      <span>{formattedDate}</span>
+                      <span>•</span>
+                      <span>{readTime} min read</span>
+                    </div>
+                    <h2
+                      className="text-lg font-semibold mb-2 group-hover:text-[var(--accent)] transition-colors duration-300 line-clamp-2"
+                      style={{
+                        fontFamily: "var(--font-outfit)",
+                        color: "var(--text-primary)",
+                      }}
+                    >
+                      {article.title}
+                    </h2>
+                    <p
+                      className="text-sm leading-relaxed line-clamp-3"
+                      style={{
+                        color: "var(--text-secondary)",
+                        fontFamily: "var(--font-outfit)",
+                      }}
+                    >
+                      {article.excerpt || "Click to read the full journal entry."}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center max-w-md mx-auto py-20 border border-dashed border-[var(--border)] rounded-2xl bg-[var(--bg-card)]">
+            <Newspaper className="w-12 h-12 mx-auto mb-4 text-[var(--text-muted)]" />
+            <p className="font-technical text-sm text-[var(--text-muted)] tracking-wider">
+              JOURNAL IS CURRENTLY EMPTY
+            </p>
+            <p className="text-xs text-[var(--text-secondary)] mt-2">
+              Check back soon for new articles and announcements.
+            </p>
+          </div>
+        )}
       </div>
     </main>
   );
