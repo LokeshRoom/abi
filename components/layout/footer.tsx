@@ -90,11 +90,18 @@ export function Footer() {
                 Instagram
               </a>
               <a
-                href={`mailto:hello@abiphotostudio.com`}
+                href={`mailto:abishekmass143@gmail.com`}
                 className="text-sm transition-colors duration-[var(--transition-fast)] hover:text-[var(--accent)]"
                 style={{ color: "var(--text-secondary)" }}
               >
-                hello@abiphotostudio.com
+                abishekmass143@gmail.com
+              </a>
+              <a
+                href={`tel:tel:+916369562031`}
+                className="text-sm transition-colors duration-[var(--transition-fast)] hover:text-[var(--accent)]"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                +91 6369562031
               </a>
             </div>
           </div>

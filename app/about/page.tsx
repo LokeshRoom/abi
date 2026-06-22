@@ -43,12 +43,11 @@ export default function AboutPage() {
       {/* ═══ Hero image ═══ */}
       <section className="relative h-[50vh] min-h-[400px] overflow-hidden">
         <Image
-          src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1920&h=1080&fit=crop"
+          src="/about-cover.png" // 👈 Remove the query parameters
           alt="Photographer at work"
           fill
-          priority
-          className="object-cover"
-          sizes="100vw"
+          sizes="100vw" // Best practice when using 'fill'
+          className="object-cover" // If you want the 'fit=crop' behavior
         />
         <div className="absolute inset-0 bg-gradient-to-b from-[var(--bg-primary)]/40 via-transparent to-[var(--bg-primary)]" />
 
@@ -78,9 +77,10 @@ export default function AboutPage() {
             {/* ═══ Photo ═══ */}
             <div className="relative aspect-[3/4] overflow-hidden rounded-xl lg:aspect-auto">
               <Image
-                src="https://images.unsplash.com/photo-1493863641943-9b68992a8d07?w=800&h=1000&fit=crop"
+                src="/abi.jpg"
                 alt="Abishek.S — Photographer"
-                fill
+                width={800}
+                height={1000}
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />

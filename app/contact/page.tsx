@@ -243,17 +243,24 @@ export default function ContactPage() {
               </h3>
               <div className="flex flex-col gap-3">
                 <a
-                  href="mailto:hello@abiphotostudio.com"
+                  href="mailto:abishekmass143@gmail.com"
                   className="text-sm transition-colors duration-[var(--transition-fast)] hover:text-[var(--accent)]"
                   style={{ color: "var(--text-secondary)" }}
                 >
-                  hello@abiphotostudio.com
+                  abishekmass143@gmail.com
+                </a>
+                <a
+                  href="tel:+916369562031"
+                  className="text-sm transition-colors duration-[var(--transition-fast)] hover:text-[var(--accent)]"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  +91 6369562031
                 </a>
                 <p
                   className="text-sm"
                   style={{ color: "var(--text-secondary)" }}
                 >
-                  Chennai, Tamil Nadu, India
+                  Shoolagiri, Tamil Nadu, India
                 </p>
               </div>
             </div>
