@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -52,9 +54,23 @@ export default function LoginPage() {
         {/* Subtle scanline overlay just for the login card */}
         <div className="absolute inset-0 scanline-effect pointer-events-none opacity-50" />
         
-        <div className="relative z-10 text-center mb-8">
-          <h1 className="text-3xl font-bold text-[var(--accent)] mb-2">Sign In</h1>
-          <p className="text-[var(--text-muted)] font-technical text-sm tracking-widest">ABI PHOTO STUDIO</p>
+        <div className="relative z-10 text-center mb-8 flex flex-col items-center">
+          {/* Studio Brand Wordmark */}
+          <Link href="/" className="group flex flex-col items-center mb-6">
+            <span
+              className="text-3xl font-extrabold leading-none tracking-tight bg-gradient-to-r from-[#E8632B] via-[#FAFAFA] to-[#A8D841] bg-clip-text text-transparent transition-all duration-[var(--transition-base)] group-hover:drop-shadow-[0_0_12px_rgba(232,99,43,0.4)]"
+            >
+              Abi
+            </span>
+            <span
+              className="font-technical text-[9px] leading-none tracking-[0.2em] mt-1 text-[var(--text-muted)]"
+            >
+              PHOTO STUDIO
+            </span>
+          </Link>
+          
+          <h1 className="text-xl font-bold text-[var(--text-primary)] mb-1">Access Studio Portal</h1>
+          <p className="text-xs text-[var(--text-muted)]">Sign in to manage bookings or view client proofs</p>
         </div>
 
         <form onSubmit={handleSubmit} className="relative z-10 space-y-6">
@@ -91,11 +107,22 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[var(--accent)] text-[var(--bg-primary)] font-bold rounded-lg px-4 py-3 hover:shadow-[0_0_20px_rgba(232,99,43,0.3)] transition-all disabled:opacity-70"
+            className="w-full bg-[var(--accent)] text-[var(--bg-primary)] font-bold rounded-lg px-4 py-3 hover:shadow-[0_0_20px_rgba(232,99,43,0.3)] cursor-pointer transition-all disabled:opacity-70"
           >
-            {loading ? "Authenticating..." : "Access Gallery"}
+            {loading ? "Authenticating..." : "Access Portal"}
           </button>
         </form>
+
+        {/* Back to Home Link */}
+        <div className="relative z-10 mt-6 pt-6 border-t border-[var(--border)] text-center">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-xs text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors group"
+          >
+            <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" />
+            Back to Home Page
+          </Link>
+        </div>
       </div>
     </div>
   );
