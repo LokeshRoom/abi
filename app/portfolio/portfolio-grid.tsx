@@ -14,64 +14,104 @@ interface Photo {
 
 const PORTFOLIO_PHOTOS: Photo[] = [
   {
-    src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop",
-    title: "Mountain Solitude",
-    category: "nature",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800&h=600&fit=crop",
-    title: "Golden Hour Valley",
-    category: "nature",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&h=600&fit=crop",
-    title: "Lakeside Dawn",
-    category: "cinematic",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&h=600&fit=crop",
-    title: "Misty Forest",
-    category: "nature",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop",
-    title: "Forest Canopy",
-    category: "nature",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1518173946687-a1e019b1cb52?w=800&h=600&fit=crop",
-    title: "City Lights",
-    category: "events",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=800&h=600&fit=crop",
-    title: "Street Moment",
+    src: "/abishek_insta/002_DWyFIc6AbPy8HUv8dX26KPOB2Ft1pG9Zd3Fqts0.jpg",
+    title: "Urban Framing",
     category: "street",
   },
   {
-    src: "https://images.unsplash.com/photo-1554080353-a576cf803bda?w=800&h=600&fit=crop",
-    title: "Light & Shadow",
-    category: "portraits",
+    src: "/abishek_insta/004_DWUGuXMEylp.jpg",
+    title: "Golden Horizon",
+    category: "nature",
   },
   {
-    src: "https://images.unsplash.com/photo-1493863641943-9b68992a8d07?w=800&h=600&fit=crop",
-    title: "Focused",
-    category: "portraits",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800&h=600&fit=crop",
-    title: "Behind the Lens",
+    src: "/abishek_insta/005_DWOW12mk6fz.jpg",
+    title: "Cinematic Moods",
     category: "cinematic",
   },
   {
-    src: "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800&h=600&fit=crop",
-    title: "Urban Portraits",
+    src: "/abishek_insta/007_DUV3jLtk-KY.jpg",
+    title: "Aesthetic Portrait",
     category: "portraits",
   },
   {
-    src: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?w=800&h=600&fit=crop",
-    title: "Gentle Morning",
+    src: "/abishek_insta/008_DT4oLJrkwQG.jpg",
+    title: "Wilderness Path",
+    category: "nature",
+  },
+  {
+    src: "/abishek_insta/009_DTzd16sk0lQ.jpg",
+    title: "City Life",
+    category: "street",
+  },
+  {
+    src: "/abishek_insta/010_DTRzA49E1dJ.jpg",
+    title: "Chasing Shadows",
     category: "cinematic",
+  },
+  {
+    src: "/abishek_insta/011_DTQLVn2k1oJ.jpg",
+    title: "Traditional Gatherings",
+    category: "events",
+  },
+  {
+    src: "/abishek_insta/012_DS4oJGMDHZS.jpg",
+    title: "Soulful Expressions",
+    category: "portraits",
+  },
+  {
+    src: "/abishek_insta/013_DS4lxUBkr-8.jpg",
+    title: "Devotion Rituals",
+    category: "events",
+  },
+  {
+    src: "/abishek_insta/014_DScZ6BTk5KF.jpg",
+    title: "Sacred Moments",
+    category: "events",
+  },
+  {
+    src: "/abishek_insta/015_DOse3DZE5Hw.jpg",
+    title: "Studio Portraits",
+    category: "portraits",
+  },
+  {
+    src: "/abishek_insta/016_DOVi391k7UG.jpg",
+    title: "Sunset Silhouette",
+    category: "cinematic",
+  },
+  {
+    src: "/abishek_insta/017_DL-EYZNTmSo.jpg",
+    title: "Natural Elegance",
+    category: "nature",
+  },
+  {
+    src: "/abishek_insta/018_DL31iL4Ta8T.jpg",
+    title: "Street Perspective",
+    category: "street",
+  },
+  {
+    src: "/abishek_insta/019_DLev6B6TS03.jpg",
+    title: "Dramatic Contrast",
+    category: "cinematic",
+  },
+  {
+    src: "/abishek_insta/021_DLYFdyvzxly.jpg",
+    title: "Monochrome Portrait",
+    category: "portraits",
+  },
+  {
+    src: "/abishek_insta/022_DKoUUeOzntu.jpg",
+    title: "Urban Exploration",
+    category: "street",
+  },
+  {
+    src: "/abishek_insta/023_DJ6K5mpTcmC.jpg",
+    title: "Vibrant Greens",
+    category: "nature",
+  },
+  {
+    src: "/abishek_insta/024_DJRjcKczLtf.jpg",
+    title: "Festive Vibes",
+    category: "events",
   },
 ];
 
