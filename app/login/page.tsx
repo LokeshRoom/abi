@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/utils/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
@@ -14,29 +13,36 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const supabase = createClient();
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (signInError) {
-      setError(signInError.message || "Invalid email or password");
-      setLoading(false);
-    } else {
-      const role = data.user?.user_metadata?.role;
-      router.refresh();
-      if (role === "ADMIN") {
-        router.push("/admin/dashboard");
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Invalid email or password");
+        setLoading(false);
       } else {
-        router.push(callbackUrl === "/gallery" ? "/" : callbackUrl);
+        router.refresh();
+        if (data.role === "ADMIN") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push(callbackUrl === "/gallery" ? "/" : callbackUrl);
+        }
       }
+    } catch (err: any) {
+      setError("An unexpected error occurred. Please try again.");
+      setLoading(false);
     }
   };
 

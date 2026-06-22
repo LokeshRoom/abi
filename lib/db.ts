@@ -4,14 +4,15 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-if (!process.env.DATABASE_URL) {
-  process.env.DATABASE_URL =
-    process.env.POSTGRES_PRISMA_URL ||
-    process.env.POSTGRES_URL ||
-    "";
-}
+const dbUrl =
+  process.env.POSTGRES_PRISMA_URL ||
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_URL ||
+  "";
 
-const dbUrl = process.env.DATABASE_URL;
+if (dbUrl) {
+  process.env.DATABASE_URL = dbUrl;
+}
 
 export const prisma =
   globalForPrisma.prisma ??
