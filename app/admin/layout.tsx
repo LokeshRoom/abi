@@ -74,10 +74,12 @@ export default async function AdminLayout({ children }: { children: ReactNode })
               {session.user.email}
             </div>
           </div>
-          <Link href="/api/auth/signout" className="flex items-center gap-3 px-4 py-2 mt-2 rounded-lg hover:bg-red-950/30 hover:text-red-500 transition-colors text-xs">
-            <LogOut size={16} />
-            <span className="font-medium">Sign Out</span>
-          </Link>
+          <form action="/api/auth/signout" method="POST" className="w-full">
+            <button type="submit" className="flex items-center gap-3 px-4 py-2 mt-2 w-full text-left rounded-lg hover:bg-red-950/30 hover:text-red-500 transition-colors text-xs cursor-pointer">
+              <LogOut size={16} />
+              <span className="font-medium">Sign Out</span>
+            </button>
+          </form>
         </div>
       </aside>
 

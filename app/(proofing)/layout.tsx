@@ -26,10 +26,12 @@ export default async function ProofingLayout({ children }: { children: ReactNode
           <span className="text-sm text-[var(--text-secondary)] hidden sm:block">
             Welcome, {session.user.name || session.user.email}
           </span>
-          <Link href="/api/auth/signout" className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-2 text-sm">
-            <LogOut size={16} />
-            <span>Sign Out</span>
-          </Link>
+          <form action="/api/auth/signout" method="POST" className="inline">
+            <button type="submit" className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-2 text-sm cursor-pointer bg-transparent border-none">
+              <LogOut size={16} />
+              <span>Sign Out</span>
+            </button>
+          </form>
         </div>
       </header>
 
