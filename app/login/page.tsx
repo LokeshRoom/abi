@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn, getSession } from "next-auth/react";
+import { createClient } from "@/utils/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
@@ -14,31 +14,31 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const supabase = createClient();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const res = await signIn("credentials", {
-      redirect: false,
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
-      callbackUrl,
     });
 
-    if (res?.error) {
-      setError("Invalid email or password");
+    if (signInError) {
+      setError(signInError.message || "Invalid email or password");
       setLoading(false);
     } else {
-      const session = await getSession();
-      if (session?.user?.role === "ADMIN") {
+      const role = data.user?.user_metadata?.role;
+      router.refresh();
+      if (role === "ADMIN") {
         router.push("/admin/dashboard");
       } else {
         router.push(callbackUrl === "/gallery" ? "/" : callbackUrl);
       }
     }
   };
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)] p-4 film-grain">

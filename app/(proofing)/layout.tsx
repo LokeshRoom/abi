@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import Link from "next/link";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { getServerSession, authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { LogOut } from "lucide-react";
 

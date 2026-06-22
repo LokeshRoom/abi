@@ -1,35 +1,58 @@
-import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
-export default withAuth(
-  function middleware(req) {
-    const token = req.nextauth.token;
-    const isAuth = !!token;
-    const isAdmin = token?.role === "ADMIN";
-    
-    // Protect /admin routes
-    if (req.nextUrl.pathname.startsWith("/admin")) {
-      if (!isAuth) {
-        return NextResponse.redirect(new URL("/login?callbackUrl=" + encodeURIComponent(req.nextUrl.pathname), req.url));
-      }
-      if (!isAdmin) {
-        return NextResponse.redirect(new URL("/gallery", req.url));
-      }
-    }
+export async function middleware(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({
+    request,
+  });
 
-    // Protect /gallery routes (proofing)
-    if (req.nextUrl.pathname.startsWith("/gallery")) {
-      if (!isAuth) {
-        return NextResponse.redirect(new URL("/login?callbackUrl=" + encodeURIComponent(req.nextUrl.pathname), req.url));
-      }
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          supabaseResponse = NextResponse.next({
+            request,
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
     }
-  },
-  {
-    callbacks: {
-      authorized: () => true, // Let the middleware function handle the logic
-    },
+  );
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Protect /admin routes
+  if (request.nextUrl.pathname.startsWith("/admin")) {
+    if (!user) {
+      return NextResponse.redirect(
+        new URL("/login?callbackUrl=" + encodeURIComponent(request.nextUrl.pathname), request.url)
+      );
+    }
+    const role = user.user_metadata?.role;
+    if (role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
   }
-);
+
+  // Protect /gallery routes (proofing)
+  if (request.nextUrl.pathname.startsWith("/gallery")) {
+    if (!user) {
+      return NextResponse.redirect(
+        new URL("/login?callbackUrl=" + encodeURIComponent(request.nextUrl.pathname), request.url)
+      );
+    }
+  }
+
+  return supabaseResponse;
+}
 
 export const config = {
   matcher: ["/admin/:path*", "/gallery/:path*"],

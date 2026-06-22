@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { getServerSession } from "@/lib/auth";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
 
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -19,6 +19,15 @@ export async function DELETE(
     // Prevent deleting oneself
     if (session.user.id === id) {
       return NextResponse.json({ error: "Cannot delete your own admin account" }, { status: 400 });
+    }
+
+    // Delete user from Supabase Auth
+    const supabaseAdmin = createAdminClient();
+    const { error: supabaseError } = await supabaseAdmin.auth.admin.deleteUser(id);
+
+    if (supabaseError) {
+      console.warn("Supabase user deletion warned/failed:", supabaseError);
+      // We will still proceed with local DB deletion just in case
     }
 
     // Delete user from DB (onDelete cascade handles galleryAccess, sessions, selections)

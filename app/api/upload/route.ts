@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { getServerSession, authOptions } from "@/lib/auth";
 import { uploadPhoto } from "@/lib/blob";
 import { prisma } from "@/lib/db";
 import exifr from "exifr";

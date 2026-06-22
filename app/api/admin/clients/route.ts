@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
-import bcrypt from "bcryptjs";
+import { getServerSession } from "@/lib/auth";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
 
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -21,7 +20,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Check if email already exists
+    // Check if email already exists in local DB
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
@@ -33,31 +32,56 @@ export async function POST(req: Request) {
       );
     }
 
-    // Hash password
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    // Create user and gallery access in a transaction
-    const client = await prisma.$transaction(async (tx) => {
-      const newUser = await tx.user.create({
-        data: {
-          name,
-          email,
-          passwordHash,
+    // Create user in Supabase Auth first
+    const supabaseAdmin = createAdminClient();
+    const { data: supabaseUser, error: supabaseError } =
+      await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
           role: "CLIENT",
+          name,
         },
       });
 
-      if (galleryIds && Array.isArray(galleryIds) && galleryIds.length > 0) {
-        await tx.galleryAccess.createMany({
-          data: galleryIds.map((galleryId) => ({
-            userId: newUser.id,
-            galleryId,
-          })),
-        });
-      }
+    if (supabaseError || !supabaseUser.user) {
+      console.error("Supabase auth user creation failed:", supabaseError);
+      return NextResponse.json(
+        { error: supabaseError?.message || "Failed to create user in Supabase Auth" },
+        { status: 400 }
+      );
+    }
 
-      return newUser;
-    });
+    // Create user and gallery access in our local database, using the Supabase ID
+    let client;
+    try {
+      client = await prisma.$transaction(async (tx) => {
+        const newUser = await tx.user.create({
+          data: {
+            id: supabaseUser.user.id, // Match the Supabase Auth ID
+            name,
+            email,
+            role: "CLIENT",
+          },
+        });
+
+        if (galleryIds && Array.isArray(galleryIds) && galleryIds.length > 0) {
+          await tx.galleryAccess.createMany({
+            data: galleryIds.map((galleryId) => ({
+              userId: newUser.id,
+              galleryId,
+            })),
+          });
+        }
+
+        return newUser;
+      });
+    } catch (dbError) {
+      // Rollback: delete user from Supabase Auth
+      await supabaseAdmin.auth.admin.deleteUser(supabaseUser.user.id);
+      throw dbError;
+    }
 
     return NextResponse.json(client, { status: 201 });
   } catch (error: any) {
