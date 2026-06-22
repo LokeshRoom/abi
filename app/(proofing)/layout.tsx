@@ -4,6 +4,8 @@ import { getServerSession, authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { LogOut } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProofingLayout({ children }: { children: ReactNode }) {
   const session = await getServerSession(authOptions);
 
