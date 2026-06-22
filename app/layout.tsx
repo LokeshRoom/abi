@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/layout/theme-provider";
+import { SmoothScrollProvider } from "@/components/layout/smooth-scroll-provider";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { SITE } from "@/lib/constants";
@@ -44,9 +45,11 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <Header />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
+          <SmoothScrollProvider>
+            <Header />
+            <main className="min-h-screen">{children}</main>
+            <Footer />
+          </SmoothScrollProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,12 +1,17 @@
 "use client";
 
+import { useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion, useInView } from "framer-motion";
+import { ArrowUp } from "lucide-react";
 import { NAV_ITEMS, SITE } from "@/lib/constants";
 
 export function Footer() {
   const pathname = usePathname();
   const currentYear = new Date().getFullYear();
+  const footerRef = useRef<HTMLElement>(null);
+  const isInView = useInView(footerRef, { once: true, margin: "-50px" });
 
   const isAdminOrGalleryOrLogin =
     pathname?.startsWith("/admin") ||
@@ -15,18 +20,36 @@ export function Footer() {
 
   if (isAdminOrGalleryOrLogin) return null;
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <footer
+      ref={footerRef}
       className="film-grain relative"
       style={{ backgroundColor: "var(--bg-secondary)" }}
     >
-      <div className="container-abi" style={{ padding: "var(--section-padding) clamp(1rem, 3vw, 2rem)" }}>
+      <div
+        className="container-abi"
+        style={{
+          padding: "var(--section-padding) clamp(1rem, 3vw, 2rem)",
+        }}
+      >
         <div className="grid gap-12 md:grid-cols-3">
           {/* ═══ Brand column ═══ */}
-          <div className="flex flex-col gap-4">
-            <Link href="/" className="group inline-flex flex-col gap-0 self-start">
+          <motion.div
+            className="flex flex-col gap-4"
+            initial={{ opacity: 0, y: 30 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0 }}
+          >
+            <Link
+              href="/"
+              className="group inline-flex flex-col gap-0 self-start"
+            >
               <span
-                className="text-2xl font-extrabold leading-none tracking-tight"
+                className="text-2xl font-extrabold leading-none tracking-tight transition-all duration-300 group-hover:drop-shadow-[0_0_12px_rgba(232,99,43,0.4)]"
                 style={{ color: "var(--accent)" }}
               >
                 Abi
@@ -50,32 +73,51 @@ export function Footer() {
             >
               Professional photography by Abishek.S
             </p>
-          </div>
+          </motion.div>
 
           {/* ═══ Quick Links ═══ */}
-          <div className="flex flex-col gap-4">
+          <motion.div
+            className="flex flex-col gap-4"
+            initial={{ opacity: 0, y: 30 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.15 }}
+          >
             <h3
               className="font-technical text-xs font-semibold tracking-[0.15em]"
               style={{ color: "var(--text-primary)" }}
             >
               QUICK LINKS
             </h3>
-            <nav className="flex flex-col gap-2" aria-label="Footer navigation">
-              {NAV_ITEMS.map((item) => (
-                <Link
+            <nav
+              className="flex flex-col gap-2"
+              aria-label="Footer navigation"
+            >
+              {NAV_ITEMS.map((item, i) => (
+                <motion.div
                   key={item.href}
-                  href={item.href}
-                  className="text-sm transition-colors duration-[var(--transition-fast)] hover:text-[var(--accent)]"
-                  style={{ color: "var(--text-secondary)" }}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={isInView ? { opacity: 1, x: 0 } : {}}
+                  transition={{ duration: 0.4, delay: 0.2 + i * 0.05 }}
                 >
-                  {item.label}
-                </Link>
+                  <Link
+                    href={item.href}
+                    className="text-sm transition-colors duration-[var(--transition-fast)] hover:text-[var(--accent)]"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    {item.label}
+                  </Link>
+                </motion.div>
               ))}
             </nav>
-          </div>
+          </motion.div>
 
           {/* ═══ Connect ═══ */}
-          <div className="flex flex-col gap-4">
+          <motion.div
+            className="flex flex-col gap-4"
+            initial={{ opacity: 0, y: 30 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.3 }}
+          >
             <h3
               className="font-technical text-xs font-semibold tracking-[0.15em]"
               style={{ color: "var(--text-primary)" }}
@@ -87,11 +129,11 @@ export function Footer() {
                 href={SITE.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm transition-colors duration-[var(--transition-fast)] hover:text-[var(--accent)]"
+                className="group inline-flex items-center gap-2 text-sm transition-colors duration-[var(--transition-fast)] hover:text-[var(--accent)]"
                 style={{ color: "var(--text-secondary)" }}
               >
                 <svg
-                  className="h-4 w-4"
+                  className="h-4 w-4 transition-transform duration-300 group-hover:scale-110"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                   aria-hidden="true"
@@ -101,27 +143,30 @@ export function Footer() {
                 Instagram
               </a>
               <a
-                href={`mailto:abishekmass143@gmail.com`}
+                href="mailto:abishekmass143@gmail.com"
                 className="text-sm transition-colors duration-[var(--transition-fast)] hover:text-[var(--accent)]"
                 style={{ color: "var(--text-secondary)" }}
               >
                 abishekmass143@gmail.com
               </a>
               <a
-                href={`tel:tel:+916369562031`}
+                href="tel:+916369562031"
                 className="text-sm transition-colors duration-[var(--transition-fast)] hover:text-[var(--accent)]"
                 style={{ color: "var(--text-secondary)" }}
               >
                 +91 6369562031
               </a>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* ═══ Bottom bar ═══ */}
-        <div
+        <motion.div
           className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 sm:flex-row"
           style={{ borderColor: "var(--border)" }}
+          initial={{ opacity: 0 }}
+          animate={isInView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.6, delay: 0.5 }}
         >
           <p
             className="text-xs"
@@ -129,13 +174,21 @@ export function Footer() {
           >
             &copy; {currentYear} {SITE.name}. All rights reserved.
           </p>
-          <p
-            className="font-technical text-[10px] tracking-[0.15em]"
+
+          {/* Back to top */}
+          <motion.button
+            onClick={scrollToTop}
+            whileHover={{ scale: 1.1, y: -2 }}
+            whileTap={{ scale: 0.9 }}
+            className="group inline-flex items-center gap-2 rounded-full px-4 py-2 text-[10px] transition-all duration-300 glass-card cursor-pointer"
             style={{ color: "var(--text-muted)" }}
           >
-            CRAFTED WITH PRECISION
-          </p>
-        </div>
+            <ArrowUp className="h-3 w-3 transition-transform duration-300 group-hover:-translate-y-0.5" />
+            <span className="font-technical tracking-[0.15em]">
+              BACK TO TOP
+            </span>
+          </motion.button>
+        </motion.div>
       </div>
     </footer>
   );

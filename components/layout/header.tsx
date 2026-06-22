@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS } from "@/lib/constants";
@@ -13,6 +13,9 @@ export function Header() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const { scrollYProgress } = useScroll();
+  const progressWidth = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
 
   const isAdminOrGalleryOrLogin =
     pathname?.startsWith("/admin") ||
@@ -31,32 +34,31 @@ export function Header() {
 
   if (isAdminOrGalleryOrLogin) return null;
 
-
   return (
     <>
       <header
         className={cn(
           "fixed top-0 right-0 left-0 z-40",
-          "transition-all duration-[var(--transition-base)]",
+          "transition-all duration-500",
           scrolled
-            ? "border-b border-[var(--border)] bg-[var(--bg-primary)]/80 backdrop-blur-xl"
+            ? "glass border-b border-white/[0.04]"
             : "bg-transparent"
         )}
       >
         <div className="container-abi flex h-16 items-center justify-between md:h-20">
           {/* ═══ Brand wordmark ═══ */}
           <Link href="/" className="group relative z-10 flex flex-col gap-0">
-            <span
+            <motion.span
               className={cn(
                 "text-2xl font-extrabold leading-none tracking-tight md:text-3xl",
                 "bg-gradient-to-r from-[#E8632B] via-[#FAFAFA] to-[#A8D841]",
-                "bg-clip-text text-transparent",
-                "transition-all duration-[var(--transition-base)]",
-                "group-hover:drop-shadow-[0_0_12px_rgba(232,99,43,0.4)]"
+                "bg-clip-text text-transparent"
               )}
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 300, damping: 15 }}
             >
               Abi
-            </span>
+            </motion.span>
             <span
               className="font-technical text-[9px] leading-none tracking-[0.2em] md:text-[10px]"
               style={{ color: "var(--text-muted)" }}
@@ -71,12 +73,17 @@ export function Header() {
             aria-label="Main navigation"
           >
             {NAV_ITEMS.map((item) => (
-              <NavLink key={item.href} href={item.href} label={item.label} />
+              <NavLink
+                key={item.href}
+                href={item.href}
+                label={item.label}
+                isActive={pathname === item.href}
+              />
             ))}
           </nav>
 
           {/* ═══ Mobile hamburger ═══ */}
-          <button
+          <motion.button
             className={cn(
               "relative z-10 rounded-lg p-2 md:hidden",
               "transition-colors duration-[var(--transition-fast)]",
@@ -84,13 +91,23 @@ export function Header() {
             )}
             onClick={() => setMobileOpen(true)}
             aria-label="Open navigation menu"
+            whileTap={{ scale: 0.9 }}
           >
             <Menu
               className="h-6 w-6"
               style={{ color: "var(--text-primary)" }}
             />
-          </button>
+          </motion.button>
         </div>
+
+        {/* ═══ Scroll progress bar ═══ */}
+        <motion.div
+          className="absolute bottom-0 left-0 h-[2px]"
+          style={{
+            width: progressWidth,
+            background: "linear-gradient(90deg, #E8632B, #A8D841)",
+          }}
+        />
       </header>
 
       {/* ═══ Mobile overlay ═══ */}
@@ -100,7 +117,15 @@ export function Header() {
 }
 
 /* ═══ Individual nav link with animated underline ═══ */
-function NavLink({ href, label }: { href: string; label: string }) {
+function NavLink({
+  href,
+  label,
+  isActive,
+}: {
+  href: string;
+  label: string;
+  isActive: boolean;
+}) {
   return (
     <Link
       href={href}
@@ -109,9 +134,21 @@ function NavLink({ href, label }: { href: string; label: string }) {
         "transition-colors duration-[var(--transition-base)]",
         "hover:text-[var(--accent)]"
       )}
-      style={{ color: "var(--text-secondary)" }}
+      style={{
+        color: isActive ? "var(--accent)" : "var(--text-secondary)",
+      }}
     >
       {label}
+      {/* Active indicator dot */}
+      {isActive && (
+        <motion.div
+          layoutId="activeNavIndicator"
+          className="absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full"
+          style={{ backgroundColor: "var(--accent)" }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        />
+      )}
+      {/* Hover underline */}
       <motion.span
         className="absolute -bottom-0.5 left-0 h-[2px] bg-[var(--accent)]"
         initial={{ width: 0 }}

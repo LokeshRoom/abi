@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { cn } from "@/lib/utils";
 import { SITE } from "@/lib/constants";
+import { Send, CheckCircle, Mail, MapPin, Clock } from "lucide-react";
 
 interface ContactFormData {
   name: string;
@@ -44,11 +46,27 @@ export default function ContactPage() {
     }
   };
 
+  const inputClasses = cn(
+    "w-full rounded-xl px-4 py-3.5 text-sm outline-none",
+    "transition-all duration-300",
+    "glass-card gradient-border",
+    "placeholder:text-[var(--text-muted)]",
+    "focus:shadow-[0_0_20px_rgba(232,99,43,0.15)]"
+  );
+
   return (
-    <section className="pt-24 md:pt-28" style={{ paddingBottom: "var(--section-padding)" }}>
+    <section
+      className="pt-24 md:pt-28"
+      style={{ paddingBottom: "var(--section-padding)" }}
+    >
       <div className="container-abi">
         {/* ═══ Page heading ═══ */}
-        <div className="mb-12 text-center">
+        <motion.div
+          className="mb-16 text-center"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
           <h1
             className="font-technical text-lg tracking-[0.3em]"
             style={{ color: "var(--accent)" }}
@@ -61,28 +79,66 @@ export default function ContactPage() {
           >
             Let&apos;s discuss your vision and create something extraordinary
           </p>
-        </div>
+          <motion.div
+            className="mx-auto mt-4 h-px w-16"
+            initial={{ width: 0 }}
+            animate={{ width: 64 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            style={{ background: "linear-gradient(90deg, transparent, var(--accent), transparent)" }}
+          />
+        </motion.div>
 
         <div className="grid gap-12 lg:grid-cols-5 lg:gap-16">
           {/* ═══ Contact form ═══ */}
-          <div className="lg:col-span-3">
+          <motion.div
+            className="lg:col-span-3"
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
             {isSubmitted ? (
-              <div className="flex flex-col items-center justify-center p-8 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] text-center h-full min-h-[300px]">
-                <svg className="w-16 h-16 mb-6 text-[#A8D841]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <h3 className="text-xl font-bold mb-3" style={{ fontFamily: "var(--font-outfit)" }}>Message Sent!</h3>
-                <p className="text-sm text-[var(--text-secondary)] mb-8 max-w-sm" style={{ fontFamily: "var(--font-outfit)" }}>
-                  Thank you for reaching out. I have received your message and will respond within 24 hours.
-                </p>
-                <button
-                  onClick={() => setIsSubmitted(false)}
-                  className="px-6 py-3 bg-[var(--accent)] text-[var(--bg-primary)] font-semibold rounded-lg text-sm hover:shadow-[0_0_15px_var(--accent-glow)] transition-all cursor-pointer"
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex h-full min-h-[300px] flex-col items-center justify-center rounded-2xl p-8 text-center glass-card"
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
+                >
+                  <CheckCircle className="mb-6 h-16 w-16 text-[#A8D841]" />
+                </motion.div>
+                <h3
+                  className="mb-3 text-xl font-bold"
                   style={{ fontFamily: "var(--font-outfit)" }}
                 >
+                  Message Sent!
+                </h3>
+                <p
+                  className="mb-8 max-w-sm text-sm"
+                  style={{
+                    color: "var(--text-secondary)",
+                    fontFamily: "var(--font-outfit)",
+                  }}
+                >
+                  Thank you for reaching out. I have received your message and
+                  will respond within 24 hours.
+                </p>
+                <motion.button
+                  onClick={() => setIsSubmitted(false)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="rounded-xl px-6 py-3 text-sm font-semibold transition-all cursor-pointer hover:shadow-[0_0_20px_rgba(232,99,43,0.3)]"
+                  style={{
+                    backgroundColor: "var(--accent)",
+                    color: "var(--bg-primary)",
+                    fontFamily: "var(--font-outfit)",
+                  }}
+                >
                   Send Another Message
-                </button>
-              </div>
+                </motion.button>
+              </motion.div>
             ) : (
               <form
                 onSubmit={handleSubmit(onSubmit)}
@@ -90,9 +146,13 @@ export default function ContactPage() {
                 noValidate
               >
                 {submitError && (
-                  <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-lg text-sm text-center">
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="rounded-xl border border-red-500/50 bg-red-500/10 p-3 text-center text-sm text-red-500"
+                  >
                     {submitError}
-                  </div>
+                  </motion.div>
                 )}
 
                 {/* Name */}
@@ -108,16 +168,9 @@ export default function ContactPage() {
                     id="name"
                     type="text"
                     placeholder="Your name"
-                    className={cn(
-                      "rounded-lg border px-4 py-3 text-sm outline-none",
-                      "transition-all duration-[var(--transition-base)]",
-                      "placeholder:text-[var(--text-muted)]",
-                      "focus:border-[var(--accent)] focus:shadow-[0_0_15px_var(--accent-glow)]",
-                      errors.name && "border-red-500"
-                    )}
+                    className={cn(inputClasses, errors.name && "border-red-500")}
                     style={{
                       backgroundColor: "var(--bg-card)",
-                      borderColor: errors.name ? undefined : "var(--border)",
                       color: "var(--text-primary)",
                     }}
                     {...register("name", { required: "Name is required" })}
@@ -142,16 +195,9 @@ export default function ContactPage() {
                     id="email"
                     type="email"
                     placeholder="your@email.com"
-                    className={cn(
-                      "rounded-lg border px-4 py-3 text-sm outline-none",
-                      "transition-all duration-[var(--transition-base)]",
-                      "placeholder:text-[var(--text-muted)]",
-                      "focus:border-[var(--accent)] focus:shadow-[0_0_15px_var(--accent-glow)]",
-                      errors.email && "border-red-500"
-                    )}
+                    className={cn(inputClasses, errors.email && "border-red-500")}
                     style={{
                       backgroundColor: "var(--bg-card)",
-                      borderColor: errors.email ? undefined : "var(--border)",
                       color: "var(--text-primary)",
                     }}
                     {...register("email", {
@@ -182,16 +228,9 @@ export default function ContactPage() {
                     id="subject"
                     type="text"
                     placeholder="What's this about?"
-                    className={cn(
-                      "rounded-lg border px-4 py-3 text-sm outline-none",
-                      "transition-all duration-[var(--transition-base)]",
-                      "placeholder:text-[var(--text-muted)]",
-                      "focus:border-[var(--accent)] focus:shadow-[0_0_15px_var(--accent-glow)]",
-                      errors.subject && "border-red-500"
-                    )}
+                    className={cn(inputClasses, errors.subject && "border-red-500")}
                     style={{
                       backgroundColor: "var(--bg-card)",
-                      borderColor: errors.subject ? undefined : "var(--border)",
                       color: "var(--text-primary)",
                     }}
                     {...register("subject", {
@@ -219,15 +258,12 @@ export default function ContactPage() {
                     rows={6}
                     placeholder="Tell me about your project or vision..."
                     className={cn(
-                      "resize-none rounded-lg border px-4 py-3 text-sm outline-none",
-                      "transition-all duration-[var(--transition-base)]",
-                      "placeholder:text-[var(--text-muted)]",
-                      "focus:border-[var(--accent)] focus:shadow-[0_0_15px_var(--accent-glow)]",
+                      inputClasses,
+                      "resize-none",
                       errors.message && "border-red-500"
                     )}
                     style={{
                       backgroundColor: "var(--bg-card)",
-                      borderColor: errors.message ? undefined : "var(--border)",
                       color: "var(--text-primary)",
                     }}
                     {...register("message", {
@@ -246,44 +282,43 @@ export default function ContactPage() {
                 </div>
 
                 {/* Submit */}
-                <button
+                <motion.button
                   type="submit"
                   disabled={isSubmitting}
+                  whileHover={!isSubmitting ? { scale: 1.02, boxShadow: "0 0 30px rgba(232, 99, 43, 0.4)" } : {}}
+                  whileTap={!isSubmitting ? { scale: 0.98 } : {}}
                   className={cn(
-                    "group relative inline-flex items-center justify-center gap-2 rounded-lg px-8 py-3",
+                    "group relative inline-flex items-center justify-center gap-2 rounded-xl px-8 py-3.5",
                     "text-sm font-semibold tracking-wide",
-                    "transition-all duration-[var(--transition-base)]",
-                    "hover:shadow-[0_0_30px_rgba(232,99,43,0.3)]",
+                    "transition-all duration-300",
                     "disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   )}
                   style={{
-                    backgroundColor: "var(--accent)",
-                    color: "var(--bg-primary)",
+                    background: "linear-gradient(135deg, #E8632B, #D4551F)",
+                    color: "#0A0A0A",
                   }}
                 >
+                  <Send className="h-4 w-4" />
                   {isSubmitting ? "Sending..." : "Send Message"}
-                  <span className="inline-block transition-transform duration-[var(--transition-base)] group-hover:translate-x-1">
-                    →
-                  </span>
-                </button>
+                </motion.button>
               </form>
             )}
-          </div>
+          </motion.div>
 
           {/* ═══ Side panel ═══ */}
-          <div className="flex flex-col gap-8 lg:col-span-2">
+          <motion.div
+            className="flex flex-col gap-6 lg:col-span-2"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
             {/* Contact info */}
-            <div
-              className="rounded-xl border p-6"
-              style={{
-                backgroundColor: "var(--bg-card)",
-                borderColor: "var(--border)",
-              }}
-            >
+            <div className="rounded-2xl p-6 glass-card">
               <h3
-                className="font-technical mb-4 text-xs tracking-[0.15em]"
+                className="font-technical mb-4 flex items-center gap-2 text-xs tracking-[0.15em]"
                 style={{ color: "var(--text-primary)" }}
               >
+                <Mail className="h-3.5 w-3.5" style={{ color: "var(--accent)" }} />
                 CONTACT INFO
               </h3>
               <div className="flex flex-col gap-3">
@@ -302,26 +337,26 @@ export default function ContactPage() {
                   +91 6369562031
                 </a>
                 <p
-                  className="text-sm"
+                  className="flex items-center gap-2 text-sm"
                   style={{ color: "var(--text-secondary)" }}
                 >
+                  <MapPin className="h-3.5 w-3.5" style={{ color: "var(--text-muted)" }} />
                   Shoolagiri, Tamil Nadu, India
                 </p>
               </div>
             </div>
 
             {/* Social */}
-            <div
-              className="rounded-xl border p-6"
-              style={{
-                backgroundColor: "var(--bg-card)",
-                borderColor: "var(--border)",
-              }}
+            <motion.div
+              className="rounded-2xl p-6 glass-card"
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
               <h3
-                className="font-technical mb-4 text-xs tracking-[0.15em]"
+                className="font-technical mb-4 flex items-center gap-2 text-xs tracking-[0.15em]"
                 style={{ color: "var(--text-primary)" }}
               >
+                <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24" style={{ color: "var(--accent)" }}><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" /></svg>
                 FOLLOW ALONG
               </h3>
               <a
@@ -329,14 +364,11 @@ export default function ContactPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(
-                  "inline-flex items-center gap-3 rounded-lg border px-4 py-3",
-                  "text-sm transition-all duration-[var(--transition-base)]",
-                  "hover:border-[var(--border-hover)] hover:bg-[var(--bg-card-hover)]"
+                  "inline-flex items-center gap-3 rounded-xl px-4 py-3",
+                  "text-sm transition-all duration-300",
+                  "glass-card hover:scale-105"
                 )}
-                style={{
-                  borderColor: "var(--border)",
-                  color: "var(--text-secondary)",
-                }}
+                style={{ color: "var(--text-secondary)" }}
               >
                 <svg
                   className="h-5 w-5"
@@ -348,20 +380,15 @@ export default function ContactPage() {
                 </svg>
                 @abishek__.004
               </a>
-            </div>
+            </motion.div>
 
             {/* Response time */}
-            <div
-              className="rounded-xl border p-6"
-              style={{
-                backgroundColor: "var(--bg-card)",
-                borderColor: "var(--border)",
-              }}
-            >
+            <div className="rounded-2xl p-6 glass-card">
               <h3
-                className="font-technical mb-4 text-xs tracking-[0.15em]"
+                className="font-technical mb-4 flex items-center gap-2 text-xs tracking-[0.15em]"
                 style={{ color: "var(--text-primary)" }}
               >
+                <Clock className="h-3.5 w-3.5" style={{ color: "var(--accent)" }} />
                 RESPONSE TIME
               </h3>
               <p
@@ -372,7 +399,7 @@ export default function ContactPage() {
                 reach out via Instagram DM.
               </p>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

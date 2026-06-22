@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState, useCallback } from "react";
+import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface Testimonial {
@@ -41,6 +42,134 @@ const DEFAULT_TESTIMONIALS: Testimonial[] = [
   },
 ];
 
+// Animated star component
+function AnimatedStar({ delay, filled }: { delay: number; filled: boolean }) {
+  return (
+    <motion.span
+      initial={{ opacity: 0, scale: 0, rotate: -180 }}
+      whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
+      viewport={{ once: true }}
+      transition={{
+        duration: 0.5,
+        delay,
+        type: "spring",
+        stiffness: 200,
+        damping: 15,
+      }}
+      className="inline-block"
+      style={{ color: filled ? "#E8632B" : "var(--border)" }}
+    >
+      ★
+    </motion.span>
+  );
+}
+
+// Individual testimonial card
+function TestimonialCard({
+  testimonial,
+  index,
+}: {
+  testimonial: Testimonial;
+  index: number;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!cardRef.current) return;
+      const rect = cardRef.current.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      setTilt({ x: y * -8, y: x * 8 });
+    },
+    []
+  );
+
+  return (
+    <motion.div
+      ref={cardRef}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{
+        duration: 0.6,
+        delay: index * 0.15,
+        ease: [0.16, 1, 0.3, 1],
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => setTilt({ x: 0, y: 0 })}
+      className={cn(
+        "group flex flex-col justify-between gap-6",
+        "rounded-2xl p-8",
+        "glass-card",
+        "min-w-[320px] max-w-[420px] shrink-0 snap-center"
+      )}
+      style={{
+        transform: `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+        transition: "transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+        transformStyle: "preserve-3d",
+      }}
+    >
+      {/* ═══ Giant quote mark ═══ */}
+      <div
+        className="font-serif text-5xl leading-none opacity-20"
+        style={{ color: "var(--accent)" }}
+      >
+        &ldquo;
+      </div>
+
+      {/* ═══ Stars ═══ */}
+      <div className="flex gap-1.5 text-sm">
+        {Array.from({ length: 5 }).map((_, j) => (
+          <AnimatedStar
+            key={j}
+            delay={index * 0.15 + j * 0.08}
+            filled={j < testimonial.rating}
+          />
+        ))}
+      </div>
+
+      {/* ═══ Quote ═══ */}
+      <p
+        className="flex-1 text-sm leading-relaxed"
+        style={{ color: "var(--text-secondary)" }}
+      >
+        {testimonial.quote}
+      </p>
+
+      {/* ═══ Attribution ═══ */}
+      <div className="flex items-center gap-3">
+        {/* Avatar placeholder with gradient */}
+        <div
+          className="flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(232,99,43,0.3), rgba(59,93,170,0.3))",
+            color: "var(--text-primary)",
+          }}
+        >
+          {testimonial.name.charAt(0)}
+        </div>
+        <div>
+          <p
+            className="text-sm font-semibold"
+            style={{ color: "var(--text-primary)" }}
+          >
+            {testimonial.name}
+          </p>
+          <p
+            className="font-technical text-[11px]"
+            style={{ color: "var(--text-muted)" }}
+          >
+            {testimonial.role}
+          </p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export function TestimonialsSection() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -55,7 +184,6 @@ export function TestimonialsSection() {
         if (res.ok) {
           const data = await res.json();
           if (data && data.length > 0) {
-            // Filter and map to display
             const featuredData = data
               .filter((t: any) => t.featured)
               .map((t: any) => ({
@@ -64,7 +192,7 @@ export function TestimonialsSection() {
                 role: t.role || "Client",
                 rating: t.rating,
               }));
-            
+
             if (featuredData.length > 0) {
               setTestimonials(featuredData);
               return;
@@ -79,20 +207,23 @@ export function TestimonialsSection() {
     loadTestimonials();
   }, []);
 
-  const scrollToIndex = useCallback((index: number) => {
-    const container = scrollRef.current;
-    if (!container || testimonials.length === 0) return;
-    const cards = container.querySelectorAll<HTMLElement>("[data-card]");
-    if (cards[index]) {
-      const cardLeft = cards[index].offsetLeft;
-      const containerWidth = container.offsetWidth;
-      const cardWidth = cards[index].offsetWidth;
-      container.scrollTo({
-        left: cardLeft - containerWidth / 2 + cardWidth / 2,
-        behavior: "smooth",
-      });
-    }
-  }, [testimonials]);
+  const scrollToIndex = useCallback(
+    (index: number) => {
+      const container = scrollRef.current;
+      if (!container || testimonials.length === 0) return;
+      const cards = container.querySelectorAll<HTMLElement>("[data-card]");
+      if (cards[index]) {
+        const cardLeft = cards[index].offsetLeft;
+        const containerWidth = container.offsetWidth;
+        const cardWidth = cards[index].offsetWidth;
+        container.scrollTo({
+          left: cardLeft - containerWidth / 2 + cardWidth / 2,
+          behavior: "smooth",
+        });
+      }
+    },
+    [testimonials]
+  );
 
   // Auto-scroll
   useEffect(() => {
@@ -108,7 +239,6 @@ export function TestimonialsSection() {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [isPaused, scrollToIndex, testimonials.length]);
-
 
   // Track scroll position to update dots
   useEffect(() => {
@@ -135,21 +265,42 @@ export function TestimonialsSection() {
 
   return (
     <section
+      className="relative overflow-hidden"
       style={{
         padding: "var(--section-padding) 0",
         backgroundColor: "var(--bg-secondary)",
       }}
     >
-      <div className="container-abi">
+      {/* ═══ Background decorations ═══ */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-[10%] top-[20%] h-64 w-64 rounded-full bg-[radial-gradient(circle,rgba(232,99,43,0.04)_0%,transparent_70%)]" />
+        <div className="absolute right-[15%] bottom-[15%] h-48 w-48 rounded-full bg-[radial-gradient(circle,rgba(59,93,170,0.04)_0%,transparent_70%)]" />
+      </div>
+
+      <div className="container-abi relative z-10">
         {/* ═══ Section title ═══ */}
-        <div className="mb-12 text-center">
+        <motion.div
+          className="mb-16 text-center"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
           <h2
             className="font-technical text-sm tracking-[0.2em]"
             style={{ color: "var(--text-primary)" }}
           >
             CLIENT STORIES
           </h2>
-        </div>
+          <motion.div
+            className="mx-auto mt-4 h-px w-16"
+            initial={{ width: 0 }}
+            whileInView={{ width: 64 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            style={{ background: "linear-gradient(90deg, transparent, var(--accent), transparent)" }}
+          />
+        </motion.div>
       </div>
 
       {/* ═══ Horizontal scroll ═══ */}
@@ -164,59 +315,14 @@ export function TestimonialsSection() {
         onMouseLeave={() => setIsPaused(false)}
       >
         {testimonials.map((t, i) => (
-          <div
-            key={i}
-            data-card
-            className={cn(
-              "flex w-[85vw] max-w-[420px] shrink-0 snap-center flex-col justify-between gap-6",
-              "rounded-xl border p-6 md:p-8",
-              "transition-all duration-[var(--transition-base)]",
-              "hover:border-[var(--border-hover)] hover:shadow-[0_0_20px_var(--accent-glow)]"
-            )}
-            style={{
-              backgroundColor: "var(--bg-card)",
-              borderColor: "var(--border)",
-            }}
-          >
-            {/* Stars */}
-            <div
-              className="flex gap-1 text-sm"
-              style={{ color: "var(--accent)" }}
-            >
-              {Array.from({ length: t.rating }).map((_, j) => (
-                <span key={j}>★</span>
-              ))}
-            </div>
-
-            {/* Quote */}
-            <p
-              className="flex-1 text-sm leading-relaxed"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              &ldquo;{t.quote}&rdquo;
-            </p>
-
-            {/* Attribution */}
-            <div>
-              <p
-                className="text-sm font-semibold"
-                style={{ color: "var(--text-primary)" }}
-              >
-                {t.name}
-              </p>
-              <p
-                className="font-technical text-[11px]"
-                style={{ color: "var(--text-muted)" }}
-              >
-                {t.role}
-              </p>
-            </div>
+          <div key={i} data-card>
+            <TestimonialCard testimonial={t} index={i} />
           </div>
         ))}
       </div>
 
       {/* ═══ Dot indicators ═══ */}
-      <div className="mt-8 flex justify-center gap-2">
+      <div className="mt-10 flex justify-center gap-2">
         {testimonials.map((_, i) => (
           <button
             key={i}
@@ -226,14 +332,16 @@ export function TestimonialsSection() {
             }}
             aria-label={`Go to testimonial ${i + 1}`}
             className={cn(
-              "h-2 rounded-full transition-all duration-[var(--transition-base)]",
-              i === activeIndex ? "w-6" : "w-2"
+              "h-2 rounded-full transition-all duration-500",
+              i === activeIndex ? "w-8" : "w-2"
             )}
             style={{
               backgroundColor:
+                i === activeIndex ? "var(--accent)" : "var(--border)",
+              boxShadow:
                 i === activeIndex
-                  ? "var(--accent)"
-                  : "var(--border)",
+                  ? "0 0 12px rgba(232, 99, 43, 0.4)"
+                  : "none",
             }}
           />
         ))}
