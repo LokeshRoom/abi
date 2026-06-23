@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "doc:components": "npx tsx scripts/generate-docs.ts",
+    "doc:arch": "npx tsx scripts/generate-arch.ts",
+    "doc:all": "npm run doc:arch && npm run doc:components"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
