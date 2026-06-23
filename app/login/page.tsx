@@ -39,7 +39,8 @@ export default function LoginPage() {
         if (data.role === "ADMIN") {
           router.push("/admin/dashboard");
         } else {
-          router.push(callbackUrl === "/gallery" ? "/" : callbackUrl);
+          const target = callbackUrl === "/admin/dashboard" ? "/gallery" : callbackUrl;
+          router.push(target);
         }
       }
     } catch (err: any) {

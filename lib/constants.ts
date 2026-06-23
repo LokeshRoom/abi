@@ -21,9 +21,9 @@ export const SITE = {
 
 // ═══ Navigation ═══
 export const NAV_ITEMS = [
-  { label: "Portfolio", href: "/portfolio", mode: "gallery" as const },
+  { label: "Portfolio", href: "/portfolio", mode: "brand" as const },
   { label: "About", href: "/about", mode: "brand" as const },
-  { label: "Blog", href: "/blog", mode: "gallery" as const },
+  { label: "Blog", href: "/blog", mode: "brand" as const },
   { label: "Booking", href: "/booking", mode: "brand" as const },
   { label: "Contact", href: "/contact", mode: "brand" as const },
 ] as const;
@@ -46,9 +46,9 @@ export const ROUTE_THEME_MAP: Record<string, ThemeMode> = {
   "/about": "brand",
   "/contact": "brand",
   "/booking": "brand",
-  "/portfolio": "gallery",
-  "/photo": "gallery",
-  "/gallery": "gallery",
-  "/blog": "gallery",
+  "/portfolio": "brand",
+  "/photo": "brand",
+  "/gallery": "brand",
+  "/blog": "brand",
   "/admin": "brand",
 };
