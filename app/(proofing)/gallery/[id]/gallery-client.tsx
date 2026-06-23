@@ -12,7 +12,8 @@ import {
   Heart,
   MessageSquare,
   CheckCircle,
-  FolderOpen
+  FolderOpen,
+  Send
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -58,15 +59,22 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
   const [filter, setFilter] = useState<"all" | "selected">("all");
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [activePhotoIndex, setActivePhotoIndex] = useState(0);
-  
+
   // Note editing state in lightbox
   const [editingNote, setEditingNote] = useState("");
   const [savingNote, setSavingNote] = useState(false);
   const [noteSaved, setNoteSaved] = useState(false);
 
+  // Submit Modal State
+  const [submitModalOpen, setSubmitModalOpen] = useState(false);
+
   // Statistics
   const selectedPhotosCount = useMemo(() => {
     return Object.values(selections).filter((s) => s.selected).length;
+  }, [selections]);
+
+  const commentsCount = useMemo(() => {
+    return Object.values(selections).filter((s) => s.selected && s.note && s.note.trim()).length;
   }, [selections]);
 
   const filteredPhotos = useMemo(() => {
@@ -128,11 +136,11 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ photoId, note: editingNote }),
       });
-      
+
       if (!res.ok) throw new Error("Failed to save note");
-      
+
       const data = await res.json();
-      
+
       setSelections((prev) => ({
         ...prev,
         [photoId]: {
@@ -165,7 +173,7 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
     } else {
       nextIndex = activePhotoIndex < filteredPhotos.length - 1 ? activePhotoIndex + 1 : 0;
     }
-    
+
     const photo = filteredPhotos[nextIndex];
     setActivePhotoIndex(nextIndex);
     setEditingNote(selections[photo.id]?.note || "");
@@ -175,32 +183,32 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
   return (
     <div className="relative min-h-[calc(100vh-4rem)] flex flex-col bg-[var(--bg-primary)]">
       {/* ═══ Top Control Bar ═══ */}
-      <div className="sticky top-16 z-30 bg-[var(--bg-primary)]/90 backdrop-blur-md border-b border-[var(--border)] py-4">
-        <div className="container-abi flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+      <div className="sticky z-30 bg-[var(--bg-primary)]/95 backdrop-blur-md border-b border-[var(--border)] py-2">
+        <div className="container-abi flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
             <Link
               href="/gallery"
-              className="p-2 rounded-full border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
+              className="p-1.5 rounded-full border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors"
             >
-              <ArrowLeft size={16} />
+              <ArrowLeft size={14} />
             </Link>
             <div>
-              <h1 className="text-xl font-bold tracking-tight">{gallery.title}</h1>
-              <p className="text-xs text-[var(--text-secondary)]">{gallery.photos.length} photos in gallery</p>
+              <h1 className="text-lg font-bold tracking-tight">{gallery.title}</h1>
+              <p className="text-[10px] text-[var(--text-secondary)]">{gallery.photos.length} photos in gallery</p>
             </div>
           </div>
 
-          {/* Progress and Filtering */}
-          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 self-stretch md:self-auto">
+          {/* Progress, Filtering & Submit */}
+          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 self-stretch md:self-auto">
             {/* Selection Counter & Progress Bar */}
-            <div className="flex flex-col w-full sm:w-48 gap-1">
-              <div className="flex items-center justify-between text-xs font-technical">
+            <div className="flex flex-col w-full sm:w-36 gap-0.5">
+              <div className="flex items-center justify-between text-[10px] font-technical">
                 <span>SELECTIONS</span>
                 <span className="text-[var(--accent)] font-bold">
                   {selectedPhotosCount} / {gallery.photos.length}
                 </span>
               </div>
-              <div className="h-1.5 bg-[var(--bg-card)] rounded-full overflow-hidden border border-[var(--border)]">
+              <div className="h-1 bg-[var(--bg-card)] rounded-full overflow-hidden border border-[var(--border)]">
                 <div
                   className="h-full bg-[var(--accent)] transition-all duration-500 rounded-full"
                   style={{ width: `${(selectedPhotosCount / gallery.photos.length) * 100}%` }}
@@ -209,11 +217,11 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
             </div>
 
             {/* Filter Toggle */}
-            <div className="flex bg-[var(--bg-card)] border border-[var(--border)] p-1 rounded-lg w-full sm:w-auto">
+            <div className="flex bg-[var(--bg-card)] border border-[var(--border)] p-0.5 rounded-lg w-full sm:w-auto">
               <button
                 onClick={() => setFilter("all")}
                 className={cn(
-                  "flex-1 sm:flex-initial px-4 py-1.5 text-xs font-technical rounded-md transition-all cursor-pointer",
+                  "flex-1 sm:flex-initial px-3 py-1 text-[10px] font-technical rounded-md transition-all cursor-pointer",
                   filter === "all"
                     ? "bg-[var(--accent)] text-[var(--bg-primary)] font-bold"
                     : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
@@ -224,7 +232,7 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
               <button
                 onClick={() => setFilter("selected")}
                 className={cn(
-                  "flex-1 sm:flex-initial px-4 py-1.5 text-xs font-technical rounded-md transition-all cursor-pointer",
+                  "flex-1 sm:flex-initial px-3 py-1 text-[10px] font-technical rounded-md transition-all cursor-pointer",
                   filter === "selected"
                     ? "bg-[var(--accent)] text-[var(--bg-primary)] font-bold"
                     : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
@@ -233,12 +241,27 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
                 SELECTED ({selectedPhotosCount})
               </button>
             </div>
+
+            {/* Submit Selections Button */}
+            <button
+              onClick={() => setSubmitModalOpen(true)}
+              disabled={selectedPhotosCount === 0}
+              className={cn(
+                "w-full sm:w-auto px-4 py-1.5 text-[10px] font-technical font-bold rounded-lg border transition-all duration-300 cursor-pointer flex items-center justify-center gap-1.5",
+                selectedPhotosCount > 0
+                  ? "bg-[var(--accent)] text-[var(--bg-primary)] border-[var(--accent)] hover:shadow-[0_0_20px_rgba(232,99,43,0.3)] hover:scale-105"
+                  : "bg-transparent border-[var(--border)] text-[var(--text-muted)] cursor-not-allowed"
+              )}
+            >
+              <Send size={10} />
+              SUBMIT SELECTIONS
+            </button>
           </div>
         </div>
       </div>
 
       {/* ═══ Main Gallery Grid ═══ */}
-      <div className="flex-1 container-abi py-8">
+      <div className="flex-1 container-abi py-4">
         {filteredPhotos.length > 0 ? (
           <motion.div
             layout
@@ -257,63 +280,68 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                    onClick={() => handleOpenLightbox(index)}
-                    className={cn(
-                      "group relative aspect-[3/2] rounded-xl overflow-hidden cursor-pointer transition-all duration-300 bg-[var(--bg-card)] border",
-                      isSelected
-                        ? "border-[var(--accent)] shadow-[0_0_20px_rgba(232,99,43,0.15)] scale-[1.01]"
-                        : "border-[var(--border)] hover:border-[var(--accent)]/40"
-                    )}
+                    className="w-full"
                   >
-                    <Image
-                      src={photo.blobUrl}
-                      alt={photo.title || "Gallery photo"}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      placeholder={photo.blurDataUrl ? "blur" : "empty"}
-                      blurDataURL={photo.blurDataUrl || undefined}
-                    />
+                    <div
+                      onClick={() => handleOpenLightbox(index)}
+                      className={cn(
+                        "group relative w-full rounded-xl overflow-hidden cursor-pointer transition-all duration-300 bg-[var(--bg-card)] border",
+                        isSelected
+                          ? "border-[var(--accent)] shadow-[0_0_25px_rgba(232,99,43,0.25)] scale-[1.01]"
+                          : "border-[var(--border)] hover:border-[var(--accent)]/50 hover:shadow-[0_0_20px_rgba(232,99,43,0.1)]"
+                      )}
+                    >
+                      <Image
+                        src={photo.blobUrl}
+                        alt={photo.title || "Gallery photo"}
+                        width={600}
+                        height={400}
+                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        className="w-full h-auto object-cover transition-transform duration-750 group-hover:scale-105"
+                        placeholder={photo.blurDataUrl ? "blur" : "empty"}
+                        blurDataURL={photo.blurDataUrl || undefined}
+                      />
 
-                    {/* Checkbox overlay always visible when selected */}
-                    {isSelected && (
-                      <div className="absolute top-3 right-3 z-10 bg-[var(--accent)] text-[var(--bg-primary)] p-1 rounded-full shadow-lg">
-                        <Heart size={14} className="fill-current" />
-                      </div>
-                    )}
+                      {/* Checkbox overlay always visible when selected */}
+                      {isSelected && (
+                        <div className="absolute top-3 right-3 z-10 bg-[var(--accent)] text-[var(--bg-primary)] p-1.5 rounded-full shadow-lg">
+                          <Heart size={12} className="fill-current" />
+                        </div>
+                      )}
 
-                    {/* Note indicator badge */}
-                    {hasNote && (
-                      <div className="absolute top-3 left-3 z-10 bg-black/70 backdrop-blur-md text-[var(--accent)] p-1.5 rounded-full border border-[var(--border)]">
-                        <MessageSquare size={12} />
-                      </div>
-                    )}
+                      {/* Note indicator badge */}
+                      {hasNote && (
+                        <div className="absolute top-3 left-3 z-10 bg-black/70 backdrop-blur-md text-[var(--accent)] p-1.5 rounded-full border border-[var(--border)]">
+                          <MessageSquare size={12} />
+                        </div>
+                      )}
 
-                    {/* Card Hover Action Overlay */}
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-4">
-                      {/* Top Action inside overlay */}
-                      <button
-                        onClick={(e) => handleToggleSelection(photo.id, e)}
-                        className={cn(
-                          "self-end p-2 rounded-full backdrop-blur-md border transition-all duration-300",
-                          isSelected
-                            ? "bg-[var(--accent)] text-[var(--bg-primary)] border-[var(--accent)]"
-                            : "bg-black/50 text-[#FAFAFA] border-white/20 hover:scale-110"
-                        )}
-                      >
-                        <Heart size={16} className={cn(isSelected && "fill-current")} />
-                      </button>
+                      {/* Card Hover Action Overlay */}
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-4">
+                        {/* Top Action inside overlay */}
+                        <button
+                          onClick={(e) => handleToggleSelection(photo.id, e)}
+                          className={cn(
+                            "self-end p-2 rounded-full backdrop-blur-md border transition-all duration-300",
+                            isSelected
+                              ? "bg-[var(--accent)] text-[var(--bg-primary)] border-[var(--accent)]"
+                              : "bg-black/50 text-[#FAFAFA] border-white/20 hover:scale-110"
+                          )}
+                        >
+                          <Heart size={16} className={cn(isSelected && "fill-current")} />
+                        </button>
 
-                      {/* Bottom Info inside overlay */}
-                      <div className="flex items-center justify-between">
-                        <span className="text-white text-xs font-semibold truncate max-w-[70%]">
-                          {photo.title || `Photo ${index + 1}`}
-                        </span>
-                        {hasNote && (
-                          <span className="text-xs text-[var(--accent)] flex items-center gap-1">
-                            <MessageSquare size={12} /> Note Added
+                        {/* Bottom Info inside overlay */}
+                        <div className="flex items-center justify-between">
+                          <span className="text-white text-xs font-semibold truncate max-w-[70%]">
+                            {photo.title || `Photo ${index + 1}`}
                           </span>
-                        )}
+                          {hasNote && (
+                            <span className="text-xs text-[var(--accent)] flex items-center gap-1">
+                              <MessageSquare size={12} /> Note Added
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </motion.div>
@@ -324,7 +352,7 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
         ) : (
           <div className="text-center py-24 border border-dashed border-[var(--border)] rounded-2xl bg-[var(--bg-card)] max-w-md mx-auto">
             <FolderOpen className="w-12 h-12 mx-auto mb-4 text-[var(--text-muted)]" />
-            <h2 className="text-lg font-bold mb-1">No Selected Photos</h2>
+            <h2 className="text-lg font-bold mb-1">No Photos Displayed</h2>
             <p className="text-xs text-[var(--text-secondary)] max-w-xs mx-auto">
               {filter === "selected"
                 ? "You haven't selected any photos yet. Switch to ALL PHOTOS and heart the images you like."
@@ -357,14 +385,14 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
               </button>
 
               {/* Photo Area (Left/Main section) */}
-              <div className="flex-1 relative flex items-center justify-center p-6 md:p-12 border-b md:border-b-0 md:border-r border-[var(--border)] min-h-[50vh] md:min-h-0">
-                <div className="relative max-h-[70vh] max-w-[80vw] aspect-[3/2] w-full h-full">
+              <div className="flex-1 relative flex items-center justify-center p-6 md:p-12 border-b md:border-b-0 md:border-r border-[var(--border)] min-h-[50vh] md:min-h-0 bg-black/40">
+                <div className="relative max-h-[75vh] max-w-[80vw] w-full h-full flex items-center justify-center">
                   <Image
                     src={photo.blobUrl}
                     alt={photo.title || "Proofing photo"}
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 768px) 100vw, 70vw"
+                    width={photo.width || 1200}
+                    height={photo.height || 800}
+                    className="max-h-[75vh] max-w-full w-auto h-auto object-contain rounded-lg shadow-2xl transition-all duration-300"
                     priority
                   />
                 </div>
@@ -398,7 +426,7 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
 
                   {/* Photo Title */}
                   <div>
-                    <h2 className="text-xl font-bold mb-1">
+                    <h2 className="text-xl font-bold mb-1 font-serif">
                       {photo.title || `Photo ${activePhotoIndex + 1}`}
                     </h2>
                     {photo.description && (
@@ -443,7 +471,7 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
                       <div className="text-xs font-technical">
                         {savingNote && <span className="text-[var(--text-muted)]">Saving...</span>}
                         {noteSaved && (
-                          <span className="text-[var(--accent-secondary)] flex items-center gap-1">
+                          <span className="text-[var(--accent-secondary)] flex items-center gap-1 font-semibold">
                             <CheckCircle size={12} /> Notes Saved
                           </span>
                         )}
@@ -470,6 +498,66 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
             </motion.div>
           );
         })()}
+      </AnimatePresence>
+
+      {/* ═══ Submit Selections Confirmation Modal ═══ */}
+      <AnimatePresence>
+        {submitModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSubmitModalOpen(false)}
+            />
+
+            {/* Modal Card */}
+            <motion.div
+              className="relative w-full max-w-md bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-8 shadow-2xl overflow-hidden text-center z-10"
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            >
+              <div className="absolute inset-0 scanline-effect pointer-events-none opacity-20" />
+
+              <div className="mx-auto w-16 h-16 bg-[var(--accent)]/10 text-[var(--accent)] rounded-full flex items-center justify-center mb-6">
+                <CheckCircle size={32} />
+              </div>
+
+              <h3 className="text-xl font-bold text-white mb-2">Finalize Your Selections?</h3>
+              <p className="text-sm text-[var(--text-secondary)] mb-6">
+                You are submitting <strong>{selectedPhotosCount} selected photos</strong>
+                {commentsCount > 0 && (
+                  <span> with <strong>{commentsCount} retouching requests</strong></span>
+                )}
+                . We will be notified and begin processing your final edits.
+              </p>
+
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => setSubmitModalOpen(false)}
+                  className="w-full py-3 bg-[var(--bg-primary)] hover:bg-[var(--bg-primary)]/80 text-white font-bold border border-[var(--border)] rounded-xl transition-all cursor-pointer"
+                >
+                  CANCEL
+                </button>
+                <button
+                  onClick={() => {
+                    // In a production app, we would mark selections as locked/finalized.
+                    // For now, we show success feedback.
+                    setSubmitModalOpen(false);
+                    alert("Your selections and feedback notes have been successfully submitted to Abi Photo Studio! We will start working on them shortly.");
+                  }}
+                  className="w-full py-3 bg-[var(--accent)] hover:shadow-[0_0_20px_rgba(232,99,43,0.3)] text-[var(--bg-primary)] font-bold rounded-xl transition-all cursor-pointer"
+                >
+                  SUBMIT NOW
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </AnimatePresence>
     </div>
   );
