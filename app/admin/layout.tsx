@@ -23,7 +23,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             <span className="text-2xl font-bold text-[var(--accent)]">Abi</span>
             <span className="font-technical text-xs text-[var(--text-muted)] tracking-widest mt-1">ADMIN</span>
           </Link>
-          <NotificationBell />
+          <NotificationBell align="left" />
         </div>
 
 

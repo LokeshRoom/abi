@@ -15,7 +15,7 @@ interface Notification {
   createdAt: string;
 }
 
-export default function NotificationBell() {
+export default function NotificationBell({ align = "right" }: { align?: "left" | "right" }) {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -135,7 +135,7 @@ export default function NotificationBell() {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-80 md:w-96 rounded-xl bg-[var(--bg-card)]/90 backdrop-blur-md border border-[var(--border)] shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className={`absolute ${align === "left" ? "left-0" : "right-0"} mt-3 w-80 md:w-96 rounded-xl bg-[var(--bg-card)]/90 backdrop-blur-md border border-[var(--border)] shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200`}>
           {/* Header */}
           <div className="px-4 py-3 border-b border-[var(--border)] flex justify-between items-center bg-[var(--bg-primary)]/40">
             <span className="font-semibold text-sm">Notifications</span>
