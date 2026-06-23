@@ -247,7 +247,7 @@ export default function GalleriesClient({ initialGalleries }: { initialGalleries
                   <span>Manage Photos</span>
                 </Link>
                 <Link
-                  href={`/gallery/${gallery.slug}`}
+                  href={`/gallery/${gallery.slug}?preview=true`}
                   target="_blank"
                   className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
                 >

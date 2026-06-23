@@ -14,6 +14,10 @@ export default async function ClientGalleriesPage() {
     redirect("/login?callbackUrl=/gallery");
   }
 
+  if (session.user.role === "ADMIN") {
+    redirect("/admin/dashboard");
+  }
+
   // Fetch galleries this client has access to
   const galleries = await prisma.gallery.findMany({
     where: session.user.role === "ADMIN" ? {} : {

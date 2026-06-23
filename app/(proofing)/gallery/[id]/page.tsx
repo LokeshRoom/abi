@@ -1,12 +1,14 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getServerSession, authOptions } from "@/lib/auth";
 import { GalleryClient } from "./gallery-client";
 
 export default async function ClientGalleryPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const session = await getServerSession(authOptions);
   
@@ -34,6 +36,14 @@ export default async function ClientGalleryPage({
 
   if (!gallery) {
     notFound();
+  }
+
+  const sParams = await searchParams;
+  const isPreview = sParams.preview === "true";
+
+  // Redirect admin users to the admin view of this gallery if not previewing
+  if (session.user.role === "ADMIN" && !isPreview) {
+    redirect(`/admin/galleries/${gallery.id}`);
   }
 
   // Ensure user has access
