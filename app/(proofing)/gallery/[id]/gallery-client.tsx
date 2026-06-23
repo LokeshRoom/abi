@@ -13,7 +13,8 @@ import {
   MessageSquare,
   CheckCircle,
   FolderOpen,
-  Send
+  Send,
+  Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -41,9 +42,14 @@ interface GalleryClientProps {
     photos: Photo[];
   };
   initialSelections: Selection[];
+  isSubmitted?: boolean;
 }
 
-export function GalleryClient({ gallery, initialSelections }: GalleryClientProps) {
+export function GalleryClient({ gallery, initialSelections, isSubmitted: initialIsSubmitted = false }: GalleryClientProps) {
+  // Submission & locking states
+  const [isSubmitted, setIsSubmitted] = useState(initialIsSubmitted);
+  const [submitting, setSubmitting] = useState(false);
+
   // Map of selections by photo ID for fast lookup and state management
   const [selections, setSelections] = useState<Record<string, { selected: boolean; note: string | null }>>(() => {
     const initial: Record<string, { selected: boolean; note: string | null }> = {};
@@ -87,6 +93,7 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
   // Handle toggling selection
   const handleToggleSelection = async (photoId: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
+    if (isSubmitted) return;
 
     // Optimistic UI update
     setSelections((prev) => {
@@ -127,6 +134,7 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
 
   // Handle saving note
   const handleSaveNote = async (photoId: string) => {
+    if (isSubmitted) return;
     setSavingNote(true);
     setNoteSaved(false);
 
@@ -182,6 +190,13 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] flex flex-col bg-[var(--bg-primary)]">
+      {isSubmitted && (
+        <div className="bg-[var(--accent)]/10 border-b border-[var(--accent)]/30 py-3 px-6 text-center text-xs font-semibold text-[var(--accent)] flex items-center justify-center gap-2">
+          <CheckCircle size={14} className="shrink-0" />
+          <span>Selections Locked: This gallery has been submitted. Your selections and retouching requests are currently being processed.</span>
+        </div>
+      )}
+
       {/* ═══ Top Control Bar ═══ */}
       <div className="sticky z-30 bg-[var(--bg-primary)]/95 backdrop-blur-md border-b border-[var(--border)] py-2">
         <div className="container-abi flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -243,19 +258,30 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
             </div>
 
             {/* Submit Selections Button */}
-            <button
-              onClick={() => setSubmitModalOpen(true)}
-              disabled={selectedPhotosCount === 0}
-              className={cn(
-                "w-full sm:w-auto px-4 py-1.5 text-[10px] font-technical font-bold rounded-lg border transition-all duration-300 cursor-pointer flex items-center justify-center gap-1.5",
-                selectedPhotosCount > 0
-                  ? "bg-[var(--accent)] text-[var(--bg-primary)] border-[var(--accent)] hover:shadow-[0_0_20px_rgba(232,99,43,0.3)] hover:scale-105"
-                  : "bg-transparent border-[var(--border)] text-[var(--text-muted)] cursor-not-allowed"
-              )}
-            >
-              <Send size={10} />
-              SUBMIT SELECTIONS
-            </button>
+            {!isSubmitted ? (
+              <button
+                onClick={() => setSubmitModalOpen(true)}
+                disabled={selectedPhotosCount === 0 || submitting}
+                className={cn(
+                  "w-full sm:w-auto px-4 py-1.5 text-[10px] font-technical font-bold rounded-lg border transition-all duration-300 cursor-pointer flex items-center justify-center gap-1.5",
+                  selectedPhotosCount > 0
+                    ? "bg-[var(--accent)] text-[var(--bg-primary)] border-[var(--accent)] hover:shadow-[0_0_20px_rgba(232,99,43,0.3)] hover:scale-105"
+                    : "bg-transparent border-[var(--border)] text-[var(--text-muted)] cursor-not-allowed"
+                )}
+              >
+                {submitting ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <Send size={10} />
+                )}
+                <span>SUBMIT SELECTIONS</span>
+              </button>
+            ) : (
+              <div className="w-full sm:w-auto px-4 py-1.5 text-[10px] font-technical font-bold rounded-lg border border-green-500/30 bg-green-500/10 text-green-400 flex items-center justify-center gap-1.5 select-none">
+                <CheckCircle size={10} />
+                <span>SUBMITTED & LOCKED</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -319,17 +345,23 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
                       {/* Card Hover Action Overlay */}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-4">
                         {/* Top Action inside overlay */}
-                        <button
-                          onClick={(e) => handleToggleSelection(photo.id, e)}
-                          className={cn(
-                            "self-end p-2 rounded-full backdrop-blur-md border transition-all duration-300",
-                            isSelected
-                              ? "bg-[var(--accent)] text-[var(--bg-primary)] border-[var(--accent)]"
-                              : "bg-black/50 text-[#FAFAFA] border-white/20 hover:scale-110"
-                          )}
-                        >
-                          <Heart size={16} className={cn(isSelected && "fill-current")} />
-                        </button>
+                        {!isSubmitted ? (
+                          <button
+                            onClick={(e) => handleToggleSelection(photo.id, e)}
+                            className={cn(
+                              "self-end p-2 rounded-full backdrop-blur-md border transition-all duration-300",
+                              isSelected
+                                ? "bg-[var(--accent)] text-[var(--bg-primary)] border-[var(--accent)]"
+                                : "bg-black/50 text-[#FAFAFA] border-white/20 hover:scale-110"
+                            )}
+                          >
+                            <Heart size={16} className={cn(isSelected && "fill-current")} />
+                          </button>
+                        ) : isSelected ? (
+                          <div className="self-end p-2 rounded-full backdrop-blur-md border border-[var(--accent)] bg-[var(--accent)] text-[var(--bg-primary)] opacity-80 cursor-not-allowed">
+                            <Heart size={16} className="fill-current" />
+                          </div>
+                        ) : null}
 
                         {/* Bottom Info inside overlay */}
                         <div className="flex items-center justify-between">
@@ -437,15 +469,28 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
                   {/* Selection Button */}
                   <button
                     onClick={() => handleToggleSelection(photo.id)}
+                    disabled={isSubmitted}
                     className={cn(
-                      "w-full py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 font-bold transition-all duration-300 border cursor-pointer",
-                      isSelected
-                        ? "bg-[var(--accent)] text-[var(--bg-primary)] border-[var(--accent)] hover:shadow-[0_0_20px_rgba(232,99,43,0.3)]"
-                        : "bg-transparent border-[var(--border)] text-[#FAFAFA] hover:border-[var(--accent)]"
+                      "w-full py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 font-bold transition-all duration-300 border",
+                      isSubmitted
+                        ? isSelected
+                          ? "bg-[var(--accent)]/50 text-[var(--bg-primary)] border-[var(--accent)]/50 cursor-not-allowed"
+                          : "bg-transparent border-[var(--border)] text-[var(--text-muted)] cursor-not-allowed"
+                        : isSelected
+                        ? "bg-[var(--accent)] text-[var(--bg-primary)] border-[var(--accent)] hover:shadow-[0_0_20px_rgba(232,99,43,0.3)] cursor-pointer"
+                        : "bg-transparent border-[var(--border)] text-[#FAFAFA] hover:border-[var(--accent)] cursor-pointer"
                     )}
                   >
                     <Heart size={18} className={cn(isSelected && "fill-current")} />
-                    <span>{isSelected ? "PHOTO SELECTED" : "SELECT THIS PHOTO"}</span>
+                    <span>
+                      {isSubmitted
+                        ? isSelected
+                          ? "SELECTED & LOCKED"
+                          : "SELECTION LOCKED"
+                        : isSelected
+                        ? "PHOTO SELECTED"
+                        : "SELECT THIS PHOTO"}
+                    </span>
                   </button>
 
                   {/* Divider */}
@@ -458,33 +503,45 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
                     </label>
                     <textarea
                       value={editingNote}
+                      disabled={isSubmitted}
                       onChange={(e) => {
                         setEditingNote(e.target.value);
                         setNoteSaved(false);
                       }}
-                      placeholder="Add retouching notes or comments for this photo (e.g., 'Crop closer', 'Fix lighting' etc.)"
-                      className="w-full h-32 bg-[var(--bg-primary)] border border-[var(--border)] rounded-xl p-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors resize-none placeholder-[var(--text-muted)]"
+                      placeholder={isSubmitted ? "No comments submitted for this photo." : "Add retouching notes or comments for this photo (e.g., 'Crop closer', 'Fix lighting' etc.)"}
+                      className={cn(
+                        "w-full h-32 bg-[var(--bg-primary)] border border-[var(--border)] rounded-xl p-4 text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)] transition-colors resize-none placeholder-[var(--text-muted)]",
+                        isSubmitted && "opacity-60 cursor-not-allowed"
+                      )}
                     />
 
                     <div className="flex items-center justify-between gap-4">
                       {/* Save Status indicators */}
                       <div className="text-xs font-technical">
-                        {savingNote && <span className="text-[var(--text-muted)]">Saving...</span>}
-                        {noteSaved && (
-                          <span className="text-[var(--accent-secondary)] flex items-center gap-1 font-semibold">
-                            <CheckCircle size={12} /> Notes Saved
-                          </span>
+                        {isSubmitted ? (
+                          <span className="text-[var(--text-muted)]">Submission locked</span>
+                        ) : (
+                          <>
+                            {savingNote && <span className="text-[var(--text-muted)]">Saving...</span>}
+                            {noteSaved && (
+                              <span className="text-[var(--accent-secondary)] flex items-center gap-1 font-semibold">
+                                <CheckCircle size={12} /> Notes Saved
+                              </span>
+                            )}
+                          </>
                         )}
                       </div>
 
                       {/* Save Button */}
-                      <button
-                        onClick={() => handleSaveNote(photo.id)}
-                        disabled={savingNote}
-                        className="px-4 py-2 bg-[var(--bg-primary)] border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors text-xs font-technical font-semibold rounded-lg disabled:opacity-55 cursor-pointer"
-                      >
-                        {savingNote ? "SAVING..." : "SAVE NOTE"}
-                      </button>
+                      {!isSubmitted && (
+                        <button
+                          onClick={() => handleSaveNote(photo.id)}
+                          disabled={savingNote}
+                          className="px-4 py-2 bg-[var(--bg-primary)] border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors text-xs font-technical font-semibold rounded-lg disabled:opacity-55 cursor-pointer"
+                        >
+                          {savingNote ? "SAVING..." : "SAVE NOTE"}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -544,11 +601,29 @@ export function GalleryClient({ gallery, initialSelections }: GalleryClientProps
                   CANCEL
                 </button>
                 <button
-                  onClick={() => {
-                    // In a production app, we would mark selections as locked/finalized.
-                    // For now, we show success feedback.
+                  onClick={async () => {
                     setSubmitModalOpen(false);
-                    alert("Your selections and feedback notes have been successfully submitted to Abi Photo Studio! We will start working on them shortly.");
+                    setSubmitting(true);
+                    try {
+                      const res = await fetch("/api/gallery/submit", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ galleryId: gallery.id }),
+                      });
+
+                      if (res.ok) {
+                        setIsSubmitted(true);
+                        alert("Your selections and feedback notes have been successfully submitted to Abi Photo Studio! We will start working on them shortly.");
+                      } else {
+                        const errData = await res.json();
+                        alert(errData.error || "Failed to submit selections.");
+                      }
+                    } catch (err) {
+                      console.error("Error submitting selections:", err);
+                      alert("An unexpected error occurred while submitting.");
+                    } finally {
+                      setSubmitting(false);
+                    }
                   }}
                   className="w-full py-3 bg-[var(--accent)] hover:shadow-[0_0_20px_rgba(232,99,43,0.3)] text-[var(--bg-primary)] font-bold rounded-xl transition-all cursor-pointer"
                 >

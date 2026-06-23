@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getServerSession, authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Camera, LayoutDashboard, Users, LogOut, Settings, Calendar, MessageSquare, Star, Newspaper } from "lucide-react";
+import NotificationBell from "@/components/layout/notification-bell";
 
 export const dynamic = "force-dynamic";
 
@@ -71,13 +72,16 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         </nav>
 
         <div className="p-4 border-t border-[var(--border)] bg-[var(--bg-primary)]/50">
-          <div className="flex items-center gap-3 px-4 py-2 text-[var(--text-secondary)]">
-            <div className="w-8 h-8 rounded-full bg-[var(--border)] flex items-center justify-center font-technical text-xs border border-[var(--text-muted)] text-[var(--text-primary)]">
-              A
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-[var(--text-secondary)] min-w-0">
+              <div className="w-8 h-8 rounded-full bg-[var(--border)] flex items-center justify-center font-technical text-xs border border-[var(--text-muted)] text-[var(--text-primary)] shrink-0">
+                A
+              </div>
+              <div className="text-xs overflow-hidden text-ellipsis whitespace-nowrap flex-1">
+                {session.user.email}
+              </div>
             </div>
-            <div className="text-xs overflow-hidden text-ellipsis whitespace-nowrap flex-1">
-              {session.user.email}
-            </div>
+            <NotificationBell />
           </div>
           <form action="/api/auth/signout" method="POST" className="w-full">
             <button type="submit" className="flex items-center gap-3 px-4 py-2 mt-2 w-full text-left rounded-lg hover:bg-red-950/30 hover:text-red-500 transition-colors text-xs cursor-pointer">

@@ -50,6 +50,7 @@ export const ROUTE_THEME_MAP: Record<string, ThemeMode> = {
   "/photo": "brand",
   "/gallery": "brand",
   "/blog": "brand",
+  "/login": "brand",
   "/admin": "brand",
   "/gallery/*": "brand",
 };

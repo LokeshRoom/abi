@@ -33,6 +33,7 @@ model User {
   galleries     GalleryAccess[]
   selections    PhotoSelection[]
   bookings      Booking[]
+  notifications Notification[]
 }
 
 model Session {
@@ -102,11 +103,13 @@ model Gallery {
 }
 
 model GalleryAccess {
-  id        String  @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
   galleryId String
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  gallery   Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+  submitted Boolean   @default(false)
+  submittedAt DateTime?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gallery   Gallery   @relation(fields: [galleryId], references: [id], onDelete: Cascade)
 
   @@unique([userId, galleryId])
 }
@@ -169,6 +172,17 @@ model ContactMessage {
   email     String
   subject   String?
   message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  link      String?
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 }

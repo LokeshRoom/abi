@@ -17,12 +17,51 @@ export default async function AdminGalleryDetail({
       photos: {
         orderBy: { createdAt: "desc" },
       },
+      access: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      },
     },
   });
 
   if (!gallery) {
     notFound();
   }
+
+  // Fetch all selections for photos in this gallery
+  const selections = await prisma.photoSelection.findMany({
+    where: {
+      photo: {
+        galleryId: gallery.id,
+      },
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+      photo: {
+        select: {
+          id: true,
+          title: true,
+          blobUrl: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
   // Serialize dates
   const serializedGallery = {
@@ -36,7 +75,21 @@ export default async function AdminGalleryDetail({
       createdAt: p.createdAt.toISOString(),
       updatedAt: p.updatedAt.toISOString(),
     })),
+    access: gallery.access.map((a) => ({
+      ...a,
+      submittedAt: a.submittedAt ? a.submittedAt.toISOString() : null,
+    })),
   };
 
-  return <GalleryDetailClient gallery={serializedGallery as any} />;
+  const serializedSelections = selections.map((s) => ({
+    ...s,
+    createdAt: s.createdAt.toISOString(),
+  }));
+
+  return (
+    <GalleryDetailClient
+      gallery={serializedGallery as any}
+      selections={serializedSelections as any}
+    />
+  );
 }

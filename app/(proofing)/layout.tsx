@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getServerSession, authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { LogOut } from "lucide-react";
+import NotificationBell from "@/components/layout/notification-bell";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,7 @@ export default async function ProofingLayout({ children }: { children: ReactNode
         </Link>
 
         <div className="flex items-center gap-6">
+          <NotificationBell />
           <span className="text-sm text-[var(--text-secondary)] hidden sm:block">
             Welcome, {session.user.name || session.user.email}
           </span>

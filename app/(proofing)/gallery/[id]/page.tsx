@@ -62,6 +62,9 @@ export default async function ClientGalleryPage({
     }
   });
 
+  const userAccess = gallery.access.find((a) => a.userId === session.user.id);
+  const isSubmitted = !!userAccess?.submitted;
+
   return (
     <GalleryClient
       gallery={{
@@ -80,6 +83,7 @@ export default async function ClientGalleryPage({
         }))
       }}
       initialSelections={selections}
+      isSubmitted={isSubmitted}
     />
   );
 }

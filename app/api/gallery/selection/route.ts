@@ -41,6 +41,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
+    // Verify gallery is not already submitted and locked for clients
+    const clientAccess = photo.gallery.access.find((a) => a.userId === session.user.id);
+    if (session.user.role !== "ADMIN" && clientAccess?.submitted) {
+      return NextResponse.json({ error: "Gallery is already submitted and locked" }, { status: 400 });
+    }
+
     // Check if selection already exists
     const existing = await prisma.photoSelection.findUnique({
       where: {
@@ -113,6 +119,12 @@ export async function PUT(req: Request) {
 
     if (!isPublic && !hasAccess) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
+
+    // Verify gallery is not already submitted and locked for clients
+    const clientAccess = photo.gallery.access.find((a) => a.userId === session.user.id);
+    if (session.user.role !== "ADMIN" && clientAccess?.submitted) {
+      return NextResponse.json({ error: "Gallery is already submitted and locked" }, { status: 400 });
     }
 
     // Find or create selection to attach note to
