@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X, Users, Mail, Trash2, Key, Sparkles, CheckSquare, Square, RefreshCw } from "lucide-react";
+import { Plus, X, Users, Mail, Trash2, Key, Sparkles, CheckSquare, Square, RefreshCw, FolderOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface Gallery {
@@ -43,6 +43,75 @@ export default function ClientsClient({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [selectedGalleries, setSelectedGalleries] = useState<string[]>([]);
+
+  // Edit Gallery Access State
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [editSelectedGalleries, setEditSelectedGalleries] = useState<string[]>([]);
+  const [isUpdatingAccess, setIsUpdatingAccess] = useState(false);
+
+  const openEditAccess = (client: Client) => {
+    setEditingClient(client);
+    setEditSelectedGalleries(client.galleries.map((g) => g.gallery.id));
+  };
+
+  const toggleEditGallery = (galleryId: string) => {
+    setEditSelectedGalleries((prev) =>
+      prev.includes(galleryId) ? prev.filter((id) => id !== galleryId) : [...prev, galleryId]
+    );
+  };
+
+  const handleUpdateAccess = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingClient) return;
+
+    setIsUpdatingAccess(true);
+    try {
+      const res = await fetch(`/api/admin/clients/${editingClient.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          galleryIds: editSelectedGalleries,
+        }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || "Failed to update gallery access");
+      }
+
+      // Update local state temporarily for immediate feedback
+      setClients((prev) =>
+        prev.map((c) => {
+          if (c.id === editingClient.id) {
+            const updatedGalleries = editSelectedGalleries.map((gid) => {
+              const galleryInfo = galleries.find((g) => g.id === gid);
+              return {
+                gallery: {
+                  id: gid,
+                  title: galleryInfo?.title || "Untitled Gallery",
+                },
+              };
+            });
+            return {
+              ...c,
+              galleries: updatedGalleries,
+            };
+          }
+          return c;
+        })
+      );
+
+      // Close modal & refresh router
+      setEditingClient(null);
+      setEditSelectedGalleries([]);
+      router.refresh();
+    } catch (error: any) {
+      console.error(error);
+      alert(error.message || "Error updating gallery access");
+    } finally {
+      setIsUpdatingAccess(false);
+    }
+  };
 
   const toggleGallery = (galleryId: string) => {
     setSelectedGalleries((prev) =>
@@ -274,17 +343,26 @@ export default function ClientsClient({
                     {new Date(client.createdAt).toLocaleDateString()}
                   </td>
                   <td className="p-4 text-right">
-                    <button
-                      disabled={updatingId === client.id}
-                      onClick={() => handleDelete(client.id)}
-                      className="p-1.5 bg-red-950/20 border border-red-900/30 rounded-lg text-red-400 hover:bg-red-950/40 hover:text-red-300 transition-all cursor-pointer"
-                    >
-                      {updatingId === client.id ? (
-                        <RefreshCw size={14} className="animate-spin" />
-                      ) : (
-                        <Trash2 size={14} />
-                      )}
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => openEditAccess(client)}
+                        className="p-1.5 bg-neutral-900 border border-neutral-700/50 rounded-lg text-neutral-300 hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all cursor-pointer"
+                        title="Manage Gallery Access"
+                      >
+                        <FolderOpen size={14} />
+                      </button>
+                      <button
+                        disabled={updatingId === client.id}
+                        onClick={() => handleDelete(client.id)}
+                        className="p-1.5 bg-red-950/20 border border-red-900/30 rounded-lg text-red-400 hover:bg-red-950/40 hover:text-red-300 transition-all cursor-pointer"
+                      >
+                        {updatingId === client.id ? (
+                          <RefreshCw size={14} className="animate-spin" />
+                        ) : (
+                          <Trash2 size={14} />
+                        )}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -301,6 +379,93 @@ export default function ClientsClient({
           </table>
         </div>
       </div>
+      {/* Edit Access Modal */}
+      {editingClient && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={() => setEditingClient(null)}
+          />
+
+          {/* Modal Card */}
+          <form
+            onSubmit={handleUpdateAccess}
+            className="relative w-full max-w-lg bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-8 shadow-2xl overflow-hidden z-10 space-y-6"
+          >
+            <div className="absolute inset-0 scanline-effect pointer-events-none opacity-20" />
+
+            <div className="flex justify-between items-center pb-4 border-b border-[var(--border)]">
+              <div>
+                <h3 className="text-xl font-bold text-white">Manage Gallery Access</h3>
+                <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                  Update shared folders for {editingClient.name}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingClient(null)}
+                className="p-1.5 rounded-full hover:bg-[var(--bg-primary)]/50 text-[var(--text-secondary)] hover:text-white transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div>
+              <label className="block text-xs font-technical text-[var(--text-secondary)] mb-3">SELECT ACCESSIBLE GALLERIES</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-56 overflow-y-auto p-4 rounded-lg bg-[var(--bg-primary)]/45 border border-[var(--border)]">
+                {galleries.map((gallery) => {
+                  const isSelected = editSelectedGalleries.includes(gallery.id);
+                  return (
+                    <button
+                      type="button"
+                      key={gallery.id}
+                      onClick={() => toggleEditGallery(gallery.id)}
+                      className="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer text-left py-1"
+                    >
+                      {isSelected ? (
+                        <CheckSquare size={16} className="text-[var(--accent)]" />
+                      ) : (
+                        <Square size={16} />
+                      )}
+                      <span className="truncate">{gallery.title}</span>
+                    </button>
+                  );
+                })}
+                {galleries.length === 0 && (
+                  <p className="text-xs text-[var(--text-muted)] col-span-full italic text-center py-2">
+                    No galleries available to assign.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <button
+                type="button"
+                onClick={() => setEditingClient(null)}
+                className="w-full py-2.5 bg-[var(--bg-primary)] hover:bg-[var(--bg-primary)]/80 text-white font-bold border border-[var(--border)] rounded-xl transition-all cursor-pointer text-sm"
+              >
+                CANCEL
+              </button>
+              <button
+                type="submit"
+                disabled={isUpdatingAccess}
+                className="w-full py-2.5 bg-[var(--accent)] hover:shadow-[0_0_20px_rgba(232,99,43,0.3)] text-[var(--bg-primary)] font-bold rounded-xl transition-all cursor-pointer text-sm flex items-center justify-center gap-1.5"
+              >
+                {isUpdatingAccess ? (
+                  <>
+                    <RefreshCw size={14} className="animate-spin" />
+                    <span>SAVING...</span>
+                  </>
+                ) : (
+                  <span>SAVE CHANGES</span>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

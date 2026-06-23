@@ -20,7 +20,7 @@ export default async function ClientGalleriesPage() {
 
   // Fetch galleries this client has access to
   const galleries = await prisma.gallery.findMany({
-    where: session.user.role === "ADMIN" ? {} : {
+    where: {
       OR: [
         { isPublic: true },
         {

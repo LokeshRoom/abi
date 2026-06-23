@@ -18,12 +18,14 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] font-outfit flex">
       {/* Sidebar */}
       <aside className="w-64 border-r border-[var(--border)] bg-[var(--bg-secondary)] flex flex-col h-screen sticky top-0">
-        <div className="p-6 border-b border-[var(--border)]">
+        <div className="p-6 border-b border-[var(--border)] flex items-center justify-between">
           <Link href="/admin/dashboard" className="flex items-center gap-2">
             <span className="text-2xl font-bold text-[var(--accent)]">Abi</span>
             <span className="font-technical text-xs text-[var(--text-muted)] tracking-widest mt-1">ADMIN</span>
           </Link>
+          <NotificationBell />
         </div>
+
 
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           <p className="px-4 py-2 text-[10px] font-technical tracking-widest text-[var(--text-muted)]">CORE</p>
@@ -72,16 +74,13 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         </nav>
 
         <div className="p-4 border-t border-[var(--border)] bg-[var(--bg-primary)]/50">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-[var(--text-secondary)] min-w-0">
-              <div className="w-8 h-8 rounded-full bg-[var(--border)] flex items-center justify-center font-technical text-xs border border-[var(--text-muted)] text-[var(--text-primary)] shrink-0">
-                A
-              </div>
-              <div className="text-xs overflow-hidden text-ellipsis whitespace-nowrap flex-1">
-                {session.user.email}
-              </div>
+          <div className="flex items-center gap-2 text-[var(--text-secondary)] min-w-0">
+            <div className="w-8 h-8 rounded-full bg-[var(--border)] flex items-center justify-center font-technical text-xs border border-[var(--text-muted)] text-[var(--text-primary)] shrink-0">
+              A
             </div>
-            <NotificationBell />
+            <div className="text-xs overflow-hidden text-ellipsis whitespace-nowrap flex-1">
+              {session.user.email}
+            </div>
           </div>
           <form action="/api/auth/signout" method="POST" className="w-full">
             <button type="submit" className="flex items-center gap-3 px-4 py-2 mt-2 w-full text-left rounded-lg hover:bg-red-950/30 hover:text-red-500 transition-colors text-xs cursor-pointer">
