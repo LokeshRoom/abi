@@ -16,7 +16,7 @@ import {
   Calendar,
   Eye,
 } from "lucide-react";
-import Image from "next/image";
+import { MediaImage } from "@/components/ui/media-image";
 import { useRouter } from "next/navigation";
 
 interface BlogPost {
@@ -339,7 +339,7 @@ export function BlogsClient({ initialPosts }: { initialPosts: any[] }) {
                   <div className="border border-dashed border-[var(--border)] rounded-lg p-4 text-center bg-[var(--bg-primary)] relative group">
                     {coverImage ? (
                       <div className="relative aspect-[16/10] w-full rounded overflow-hidden mb-3">
-                        <Image
+                        <MediaImage
                           src={coverImage}
                           alt="Cover preview"
                           fill
@@ -457,7 +457,7 @@ export function BlogsClient({ initialPosts }: { initialPosts: any[] }) {
           >
             {post.coverImage ? (
               <div className="w-full md:w-44 aspect-[16/10] relative rounded-lg overflow-hidden shrink-0 bg-[var(--bg-primary)]">
-                <Image
+                <MediaImage
                   src={post.coverImage}
                   alt={post.title}
                   fill

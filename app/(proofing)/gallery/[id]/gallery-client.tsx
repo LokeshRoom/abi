@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo } from "react";
-import Image from "next/image";
+import { MediaImage } from "@/components/ui/media-image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -317,7 +317,7 @@ export function GalleryClient({ gallery, initialSelections, isSubmitted: initial
                           : "border-[var(--border)] hover:border-[var(--accent)]/50 hover:shadow-[0_0_20px_rgba(232,99,43,0.1)]"
                       )}
                     >
-                      <Image
+                      <MediaImage
                         src={photo.blobUrl}
                         alt={photo.title || "Gallery photo"}
                         width={600}
@@ -419,7 +419,7 @@ export function GalleryClient({ gallery, initialSelections, isSubmitted: initial
               {/* Photo Area (Left/Main section) */}
               <div className="flex-1 relative flex items-center justify-center p-6 md:p-12 border-b md:border-b-0 md:border-r border-[var(--border)] min-h-[50vh] md:min-h-0 bg-black/40">
                 <div className="relative max-h-[75vh] max-w-[80vw] w-full h-full flex items-center justify-center">
-                  <Image
+                  <MediaImage
                     src={photo.blobUrl}
                     alt={photo.title || "Proofing photo"}
                     width={photo.width || 1200}

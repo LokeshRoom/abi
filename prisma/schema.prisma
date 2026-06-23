@@ -57,6 +57,7 @@ model Photo {
   title        String?
   description  String?
   blobUrl      String
+  gdriveId     String?
   blurDataUrl  String?
   width        Int
   height       Int
@@ -92,6 +93,7 @@ model Gallery {
   slug        String   @unique
   description String?
   coverUrl    String?
+  gdriveFolderId String?
   isPublic    Boolean  @default(false)
   password    String?
   expiresAt   DateTime?
@@ -185,4 +187,12 @@ model Notification {
   link      String?
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+model GDriveConfig {
+  id           String   @id @default("default")
+  accessToken  String
+  refreshToken String
+  expiryDate   BigInt
+  updatedAt    DateTime @updatedAt
 }

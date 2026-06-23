@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession, authOptions } from "@/lib/auth";
-import { uploadPhoto } from "@/lib/blob";
+import { uploadToDrive, getOrCreateGalleryFolder } from "@/lib/gdrive";
 import { prisma } from "@/lib/db";
 import exifr from "exifr";
 import sharp from "sharp";
@@ -64,16 +64,29 @@ export async function POST(req: Request) {
     
     const blurDataUrl = `data:${blurBuffer.info.format === "jpeg" ? "image/jpeg" : "image/png"};base64,${blurBuffer.data.toString("base64")}`;
 
-    // 4. Upload original file to Vercel Blob
+    // 4. Upload original file to Google Drive
     // Ensure filename is safe and unique
     const uniqueFilename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
-    const blob = await uploadPhoto(file, uniqueFilename);
+    
+    let gdriveFolderId: string | undefined = undefined;
+    if (galleryId) {
+      const gallery = await prisma.gallery.findUnique({
+        where: { id: galleryId },
+        select: { title: true },
+      });
+      if (gallery) {
+        gdriveFolderId = await getOrCreateGalleryFolder(galleryId, gallery.title);
+      }
+    }
 
-    // 5. Save to database
+    const gdriveResult = await uploadToDrive(buffer, uniqueFilename, file.type, gdriveFolderId);
+
+    // 5. Save to database with a temp blobUrl
     const photo = await prisma.photo.create({
       data: {
         title: file.name,
-        blobUrl: blob.url,
+        blobUrl: "TEMP",
+        gdriveId: gdriveResult.id,
         blurDataUrl,
         width: metadata.width || 0,
         height: metadata.height || 0,
@@ -89,7 +102,15 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ success: true, photo });
+    // Update the photo with its self-contained proxy URL
+    const updatedPhoto = await prisma.photo.update({
+      where: { id: photo.id },
+      data: {
+        blobUrl: `/api/media/${photo.id}`,
+      },
+    });
+
+    return NextResponse.json({ success: true, photo: updatedPhoto });
   } catch (error: any) {
     console.error("Upload error:", error);
     return NextResponse.json(

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getServerSession, authOptions } from "@/lib/auth";
 import { deletePhoto } from "@/lib/blob";
+import { deleteFromDrive } from "@/lib/gdrive";
 
 export async function DELETE(
   req: Request,
@@ -30,13 +31,15 @@ export async function DELETE(
       where: { id },
     });
 
-    // Try deleting from Vercel Blob (catch error to prevent blocking DB delete sync)
+    // Try deleting from Google Drive or Vercel Blob (catch error to prevent blocking DB delete sync)
     try {
-      if (photo.blobUrl) {
+      if (photo.gdriveId) {
+        await deleteFromDrive(photo.gdriveId);
+      } else if (photo.blobUrl && !photo.blobUrl.startsWith("/api/media/")) {
         await deletePhoto(photo.blobUrl);
       }
-    } catch (blobError) {
-      console.error("Failed to delete from blob storage:", blobError);
+    } catch (storageError) {
+      console.error("Failed to delete from storage:", storageError);
     }
 
     return NextResponse.json({ message: "Photo deleted successfully" }, { status: 200 });

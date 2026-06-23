@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { ArrowLeft, Upload, Trash2, Camera, Sparkles, AlertCircle, RefreshCw, Users, CheckCircle, Clock, Download } from "lucide-react";
-import Image from "next/image";
+import { MediaImage } from "@/components/ui/media-image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -295,7 +295,7 @@ export default function GalleryDetailClient({
               key={photo.id}
               className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl overflow-hidden group hover:border-[var(--border-hover)] transition-all duration-[var(--transition-base)] relative aspect-[3/2]"
             >
-              <Image
+              <MediaImage
                 src={photo.blobUrl}
                 alt={photo.title || "Gallery photo"}
                 fill
@@ -406,7 +406,7 @@ export default function GalleryDetailClient({
                             <div className="space-y-3">
                               {/* Image thumbnail */}
                               <div className="relative aspect-[3/2] rounded-md overflow-hidden bg-black/20">
-                                <Image
+                                <MediaImage
                                   src={sel.photo.blobUrl}
                                   alt={sel.photo.title || "Selected Photo"}
                                   fill
