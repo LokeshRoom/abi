@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import Link from "next/link";
 import { getServerSession, authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { LogOut } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
 import NotificationBell from "@/components/layout/notification-bell";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +28,13 @@ export default async function ProofingLayout({ children }: { children: ReactNode
           <span className="text-sm text-[var(--text-secondary)] hidden sm:block">
             Welcome, {session.user.name || session.user.email}
           </span>
+          <Link
+            href="/gallery/settings"
+            className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1.5 text-sm"
+          >
+            <Settings size={16} />
+            <span className="hidden sm:inline">Settings</span>
+          </Link>
           <form action="/api/auth/signout" method="POST" className="inline">
             <button type="submit" className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-2 text-sm cursor-pointer bg-transparent border-none">
               <LogOut size={16} />

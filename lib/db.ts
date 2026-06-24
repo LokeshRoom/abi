@@ -18,7 +18,7 @@ if (dbUrl) {
   process.env.DATABASE_URL = dbUrl;
 }
 
-export const prisma =
+const prismaClient =
   globalForPrisma.prisma ??
   new PrismaClient({
     datasources: {
@@ -29,5 +29,43 @@ export const prisma =
   });
 
 if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+  globalForPrisma.prisma = prismaClient;
 }
+
+export const prisma = prismaClient.$extends({
+  query: {
+    $allOperations({ model, operation, args, query }) {
+      const maxRetries = 3;
+      let delay = 500; // ms
+      
+      const execute = async (attempt: number): Promise<any> => {
+        try {
+          return await query(args);
+        } catch (error: any) {
+          // Check if it is a database connection / reachability / timeout error
+          const isConnectionError = 
+            error.code === "P1001" || 
+            error.code === "P1002" || 
+            error.code === "P1008" || 
+            error.code === "P1017" ||
+            error.message?.includes("Can't reach database server") ||
+            error.message?.includes("timeout") ||
+            error.message?.includes("connection") ||
+            error.message?.includes("pool");
+
+          if (isConnectionError && attempt < maxRetries) {
+            console.warn(
+              `Prisma connection error on ${model || "raw"}.${operation} (attempt ${attempt}/${maxRetries}). Retrying in ${delay}ms... Error: ${error.message || error}`
+            );
+            await new Promise((resolve) => setTimeout(resolve, delay));
+            delay *= 2; // Exponential backoff
+            return execute(attempt + 1);
+          }
+          throw error;
+        }
+      };
+
+      return execute(1);
+    },
+  },
+});
