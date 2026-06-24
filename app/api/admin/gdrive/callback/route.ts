@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
 import { google } from "googleapis";
 import { prisma } from "@/lib/db";
+import { getServerSession, authOptions } from "@/lib/auth";
 
 export async function GET(req: Request) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || session.user.role !== "ADMIN") {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
   const { searchParams } = new URL(req.url);
   const code = searchParams.get("code");
   const error = searchParams.get("error");

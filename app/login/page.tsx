@@ -15,6 +15,10 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const isSafeCallbackUrl = (url: string) => {
+    return url.startsWith("/") && !url.startsWith("//");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -39,7 +43,9 @@ export default function LoginPage() {
         if (data.role === "ADMIN") {
           router.push("/admin/dashboard");
         } else {
-          const target = callbackUrl === "/admin/dashboard" ? "/gallery" : callbackUrl;
+          const target = isSafeCallbackUrl(callbackUrl) && callbackUrl !== "/admin/dashboard" 
+            ? callbackUrl 
+            : "/gallery";
           router.push(target);
         }
       }

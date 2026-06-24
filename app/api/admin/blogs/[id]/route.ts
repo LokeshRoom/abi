@@ -26,7 +26,7 @@ export async function PATCH(
     }
 
     const { id } = await params;
-    const body = await req.json();
+    const { title, slug: requestedSlug, excerpt, content, coverImage, published } = await req.json();
 
     const existingPost = await prisma.blogPost.findUnique({
       where: { id },
@@ -36,11 +36,16 @@ export async function PATCH(
       return NextResponse.json({ error: "Blog post not found" }, { status: 404 });
     }
 
-    const data: any = { ...body };
+    const data: any = {};
+    if (title !== undefined) data.title = title;
+    if (excerpt !== undefined) data.excerpt = excerpt;
+    if (content !== undefined) data.content = content;
+    if (coverImage !== undefined) data.coverImage = coverImage;
 
     // Handle published status transition
-    if (data.published !== undefined) {
-      if (data.published) {
+    if (published !== undefined) {
+      data.published = published;
+      if (published) {
         data.publishedAt = existingPost.publishedAt || new Date();
       } else {
         data.publishedAt = null;
@@ -48,8 +53,8 @@ export async function PATCH(
     }
 
     // Handle slug update or slugify new title if provided
-    if (data.slug) {
-      data.slug = slugify(data.slug);
+    if (requestedSlug) {
+      data.slug = slugify(requestedSlug);
       // Ensure the slug is unique (excluding this post)
       const duplicate = await prisma.blogPost.findFirst({
         where: {
@@ -60,10 +65,6 @@ export async function PATCH(
       if (duplicate) {
         data.slug = `${data.slug}-${Math.random().toString(36).substring(2, 6)}`;
       }
-    } else if (data.title && data.title !== existingPost.title) {
-      // If title changed but slug was not explicitly provided, let's keep the old slug,
-      // or we can generate a new one. It's safer to keep the old slug to prevent broken links,
-      // but let's allow changing it if requested. Let's keep it unchanged unless they send slug.
     }
 
     const updatedPost = await prisma.blogPost.update({
