@@ -75,7 +75,7 @@ export default function ContactsClient({ initialMessages }: { initialMessages: C
   });
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className="p-4 sm:p-8 max-w-6xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Inquiries Manager</h1>
@@ -112,7 +112,7 @@ export default function ContactsClient({ initialMessages }: { initialMessages: C
               msg.read ? "border-[var(--border)] opacity-75" : "border-[#A8D841]/30 glow-green/5"
             }`}
           >
-            <div className="flex justify-between items-start gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
               <div>
                 <div className="flex items-center gap-2 mb-1.5">
                   <h2 className="text-lg font-bold">{msg.name}</h2>
@@ -135,7 +135,7 @@ export default function ContactsClient({ initialMessages }: { initialMessages: C
               </div>
 
               {/* Actions */}
-              <div className="flex gap-2">
+              <div className="flex gap-2 self-end sm:self-start shrink-0">
                 <button
                   disabled={updatingId === msg.id}
                   onClick={() => handleToggleRead(msg.id, msg.read)}

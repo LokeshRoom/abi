@@ -102,7 +102,7 @@ export default function GalleriesClient({ initialGalleries }: { initialGalleries
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className="p-4 sm:p-8 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Galleries Manager</h1>

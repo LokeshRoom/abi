@@ -188,7 +188,7 @@ export default function ClientsClient({
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className="p-4 sm:p-8 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Clients Manager</h1>
@@ -294,8 +294,8 @@ export default function ClientsClient({
         </form>
       )}
 
-      {/* Clients Table */}
-      <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl overflow-hidden shadow-lg">
+      {/* Clients Table (desktop only) */}
+      <div className="hidden md:block bg-[var(--bg-card)] border border-[var(--border)] rounded-xl overflow-hidden shadow-lg">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -378,6 +378,76 @@ export default function ClientsClient({
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Mobile view cards (hidden md) */}
+      <div className="md:hidden space-y-4">
+        {clients.map((client) => (
+          <div key={client.id} className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-5 space-y-3.5 shadow-md">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="font-semibold text-base">{client.name}</h3>
+                <span className="text-[10px] text-[var(--text-muted)] font-technical block mt-0.5">
+                  CREATED {new Date(client.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => openEditAccess(client)}
+                  className="p-2 bg-neutral-900 border border-neutral-700/50 rounded-lg text-neutral-300 hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all cursor-pointer"
+                  title="Manage Gallery Access"
+                >
+                  <FolderOpen size={14} />
+                </button>
+                <button
+                  disabled={updatingId === client.id}
+                  onClick={() => handleDelete(client.id)}
+                  className="p-2 bg-red-950/20 border border-red-900/30 rounded-lg text-red-400 hover:bg-red-950/40 hover:text-red-300 transition-all cursor-pointer"
+                >
+                  {updatingId === client.id ? (
+                    <RefreshCw size={14} className="animate-spin" />
+                  ) : (
+                    <Trash2 size={14} />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+              <Mail size={14} className="text-[var(--text-muted)] shrink-0" />
+              <span className="truncate">{client.email}</span>
+            </div>
+
+            <div className="border-t border-[var(--border)]/60 pt-3">
+              <p className="text-[10px] font-technical text-[var(--text-muted)] mb-1.5">GALLERY ACCESS</p>
+              <div className="flex flex-wrap gap-1.5">
+                {client.galleries.map((g) => (
+                  <span
+                    key={g.gallery.id}
+                    className="px-2 py-0.5 rounded text-[10px] bg-[var(--border)] text-[var(--text-secondary)] border border-[var(--border)] whitespace-nowrap"
+                  >
+                    {g.gallery.title}
+                  </span>
+                ))}
+                {client.galleries.length === 0 && (
+                  <span className="text-xs text-[var(--text-muted)] italic">No galleries assigned</span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center text-xs text-[var(--text-secondary)] font-technical pt-1">
+              <span>BOOKINGS</span>
+              <span className="font-semibold text-[var(--accent)]">{client._count.bookings}</span>
+            </div>
+          </div>
+        ))}
+
+        {clients.length === 0 && (
+          <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-12 text-center text-[var(--text-muted)] font-technical">
+            <Users className="w-12 h-12 mx-auto mb-4 text-[var(--text-muted)]" />
+            NO ACTIVE CLIENTS FOUND
+          </div>
+        )}
       </div>
       {/* Edit Access Modal */}
       {editingClient && (

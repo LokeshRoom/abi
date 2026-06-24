@@ -67,7 +67,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className="p-4 sm:p-8 max-w-6xl mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Bookings Manager</h1>
@@ -156,13 +156,13 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             </div>
 
             {/* Action Buttons */}
-            <div className="flex lg:flex-col gap-2 shrink-0 border-t lg:border-t-0 lg:border-l border-[var(--border)] pt-4 lg:pt-0 lg:pl-6">
+            <div className="flex flex-col sm:flex-row lg:flex-col gap-2 shrink-0 border-t lg:border-t-0 lg:border-l border-[var(--border)] pt-4 lg:pt-0 lg:pl-6 w-full lg:w-auto">
               {booking.status === "PENDING" && (
                 <>
                   <button
                     disabled={updatingId === booking.id}
                     onClick={() => handleStatusUpdate(booking.id, "CONFIRMED")}
-                    className="flex-1 lg:w-32 py-2 px-3 bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    className="w-full sm:flex-1 lg:w-32 py-2 px-3 bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                   >
                     <Check size={14} />
                     Confirm
@@ -170,7 +170,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                   <button
                     disabled={updatingId === booking.id}
                     onClick={() => handleStatusUpdate(booking.id, "CANCELLED")}
-                    className="flex-1 lg:w-32 py-2 px-3 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    className="w-full sm:flex-1 lg:w-32 py-2 px-3 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                   >
                     <X size={14} />
                     Cancel
@@ -183,7 +183,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                   <button
                     disabled={updatingId === booking.id}
                     onClick={() => handleStatusUpdate(booking.id, "COMPLETED")}
-                    className="flex-1 lg:w-32 py-2 px-3 bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    className="w-full sm:flex-1 lg:w-32 py-2 px-3 bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                   >
                     <Check size={14} />
                     Complete
@@ -191,7 +191,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                   <button
                     disabled={updatingId === booking.id}
                     onClick={() => handleStatusUpdate(booking.id, "CANCELLED")}
-                    className="flex-1 lg:w-32 py-2 px-3 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                    className="w-full sm:flex-1 lg:w-32 py-2 px-3 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                   >
                     <X size={14} />
                     Cancel
@@ -203,7 +203,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                 <button
                   disabled={updatingId === booking.id}
                   onClick={() => handleStatusUpdate(booking.id, "PENDING")}
-                  className="flex-1 lg:w-32 py-2 px-3 bg-[var(--border)] border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--bg-card-hover)] text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                  className="w-full lg:w-32 py-2 px-3 bg-[var(--border)] border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--bg-card-hover)] text-xs font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                 >
                   <AlertTriangle size={14} />
                   Re-open
