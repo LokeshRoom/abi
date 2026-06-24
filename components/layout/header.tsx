@@ -4,15 +4,17 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { Menu } from "lucide-react";
+import { Menu, SunMoon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS } from "@/lib/constants";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { useTheme } from "@/components/layout/theme-provider";
 
 export function Header() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { toggleLight } = useTheme();
 
   const { scrollYProgress } = useScroll();
   const progressWidth = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
@@ -68,19 +70,33 @@ export function Header() {
           </Link>
 
           {/* ═══ Desktop navigation ═══ */}
-          <nav
-            className="hidden items-center gap-8 md:flex"
-            aria-label="Main navigation"
-          >
-            {NAV_ITEMS.map((item) => (
-              <NavLink
-                key={item.href}
-                href={item.href}
-                label={item.label}
-                isActive={pathname === item.href}
-              />
-            ))}
-          </nav>
+          <div className="hidden items-center gap-8 md:flex">
+            <nav
+              className="flex items-center gap-8"
+              aria-label="Main navigation"
+            >
+              {NAV_ITEMS.map((item) => (
+                <NavLink
+                  key={item.href}
+                  href={item.href}
+                  label={item.label}
+                  isActive={pathname === item.href}
+                />
+              ))}
+            </nav>
+
+            <motion.button
+              onClick={toggleLight}
+              className={cn(
+                "p-2 rounded-lg border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)] text-[var(--text-secondary)] transition-all cursor-pointer flex items-center justify-center",
+                "hover:shadow-[0_0_15px_var(--accent-glow)] hover:bg-[var(--bg-card)]"
+              )}
+              whileTap={{ scale: 0.95 }}
+              aria-label="Toggle theme"
+            >
+              <SunMoon size={16} />
+            </motion.button>
+          </div>
 
           {/* ═══ Mobile hamburger ═══ */}
           <motion.button

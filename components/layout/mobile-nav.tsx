@@ -3,9 +3,10 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
-import { X } from "lucide-react";
+import { X, SunMoon } from "lucide-react";
 import { NAV_ITEMS, SITE } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/components/layout/theme-provider";
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -41,6 +42,8 @@ const brandVariants: Variants = {
 };
 
 export function MobileNav({ isOpen, onClose }: MobileNavProps) {
+  const { toggleLight } = useTheme();
+
   // Lock body scroll when open
   useEffect(() => {
     if (isOpen) {
@@ -123,24 +126,39 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
 
           {/* ═══ Brand footer ═══ */}
           <motion.div
-            className="relative z-10 pb-12 text-center"
+            className="relative z-10 pb-12 text-center flex flex-col items-center gap-4"
             variants={brandVariants}
             initial="closed"
             animate="open"
             exit="closed"
           >
-            <p
-              className="text-2xl font-bold tracking-tight"
-              style={{ color: "var(--accent)" }}
+            <div>
+              <p
+                className="text-2xl font-bold tracking-tight"
+                style={{ color: "var(--accent)" }}
+              >
+                Abi
+              </p>
+              <p
+                className="font-technical mt-1"
+                style={{ color: "var(--text-muted)" }}
+              >
+                {SITE.tagline}
+              </p>
+            </div>
+
+            <motion.button
+              onClick={toggleLight}
+              className={cn(
+                "p-2.5 rounded-lg border border-[var(--border)] hover:border-[var(--accent)] hover:text-[var(--accent)] text-[var(--text-secondary)] transition-all cursor-pointer flex items-center justify-center",
+                "hover:shadow-[0_0_15px_var(--accent-glow)] hover:bg-[var(--bg-card)]"
+              )}
+              whileTap={{ scale: 0.95 }}
+              aria-label="Toggle theme"
             >
-              Abi
-            </p>
-            <p
-              className="font-technical mt-1"
-              style={{ color: "var(--text-muted)" }}
-            >
-              {SITE.tagline}
-            </p>
+              <SunMoon size={18} className="mr-2" />
+              <span className="font-technical text-xs tracking-wider">Toggle Theme</span>
+            </motion.button>
           </motion.div>
         </motion.div>
       )}

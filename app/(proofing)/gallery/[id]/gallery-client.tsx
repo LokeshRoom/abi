@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { MediaImage } from "@/components/ui/media-image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -45,6 +45,21 @@ interface GalleryClientProps {
   isSubmitted?: boolean;
 }
 
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 300 : direction < 0 ? -300 : 0,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction < 0 ? 300 : direction > 0 ? -300 : 0,
+    opacity: 0,
+  }),
+};
+
 export function GalleryClient({ gallery, initialSelections, isSubmitted: initialIsSubmitted = false }: GalleryClientProps) {
   // Submission & locking states
   const [isSubmitted, setIsSubmitted] = useState(initialIsSubmitted);
@@ -73,6 +88,10 @@ export function GalleryClient({ gallery, initialSelections, isSubmitted: initial
 
   // Submit Modal State
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
+
+  // Slide direction state: 1 for next/right, -1 for prev/left
+  const [direction, setDirection] = useState(0);
+
 
   // Statistics
   const selectedPhotosCount = useMemo(() => {
@@ -168,25 +187,49 @@ export function GalleryClient({ gallery, initialSelections, isSubmitted: initial
   // Open Lightbox
   const handleOpenLightbox = (index: number) => {
     const photo = filteredPhotos[index];
+    setDirection(0);
     setActivePhotoIndex(index);
     setEditingNote(selections[photo.id]?.note || "");
     setLightboxOpen(true);
   };
 
   // Navigate Lightbox
-  const handleNavigateLightbox = (direction: "prev" | "next") => {
-    let nextIndex = activePhotoIndex;
-    if (direction === "prev") {
-      nextIndex = activePhotoIndex > 0 ? activePhotoIndex - 1 : filteredPhotos.length - 1;
-    } else {
-      nextIndex = activePhotoIndex < filteredPhotos.length - 1 ? activePhotoIndex + 1 : 0;
-    }
+  const handleNavigateLightbox = useCallback((dir: "prev" | "next") => {
+    setDirection(dir === "next" ? 1 : -1);
+    setActivePhotoIndex((prevIndex) => {
+      let nextIndex = prevIndex;
+      if (dir === "prev") {
+        nextIndex = prevIndex > 0 ? prevIndex - 1 : filteredPhotos.length - 1;
+      } else {
+        nextIndex = prevIndex < filteredPhotos.length - 1 ? prevIndex + 1 : 0;
+      }
 
-    const photo = filteredPhotos[nextIndex];
-    setActivePhotoIndex(nextIndex);
-    setEditingNote(selections[photo.id]?.note || "");
-    setNoteSaved(false);
-  };
+      const photo = filteredPhotos[nextIndex];
+      if (photo) {
+        setEditingNote(selections[photo.id]?.note || "");
+      }
+      setNoteSaved(false);
+      return nextIndex;
+    });
+  }, [filteredPhotos, selections]);
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    if (!lightboxOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        handleNavigateLightbox("prev");
+      } else if (e.key === "ArrowRight") {
+        handleNavigateLightbox("next");
+      } else if (e.key === "Escape") {
+        setLightboxOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [lightboxOpen, handleNavigateLightbox]);
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] flex flex-col bg-[var(--bg-primary)]">
@@ -417,16 +460,32 @@ export function GalleryClient({ gallery, initialSelections, isSubmitted: initial
               </button>
 
               {/* Photo Area (Left/Main section) */}
-              <div className="flex-1 relative flex items-center justify-center p-6 md:p-12 border-b md:border-b-0 md:border-r border-[var(--border)] min-h-[50vh] md:min-h-0 bg-black/40">
-                <div className="relative max-h-[75vh] max-w-[80vw] w-full h-full flex items-center justify-center">
-                  <MediaImage
-                    src={photo.blobUrl}
-                    alt={photo.title || "Proofing photo"}
-                    width={photo.width || 1200}
-                    height={photo.height || 800}
-                    className="max-h-[75vh] max-w-full w-auto h-auto object-contain rounded-lg shadow-2xl transition-all duration-300"
-                    priority
-                  />
+              <div className="flex-1 relative flex items-center justify-center p-6 md:p-12 border-b md:border-b-0 md:border-r border-[var(--border)] min-h-[50vh] md:min-h-0 bg-black/40 overflow-hidden">
+                <div className="relative max-h-[75vh] max-w-[80vw] w-full h-full flex items-center justify-center overflow-hidden">
+                  <AnimatePresence initial={false} custom={direction} mode="wait">
+                    <motion.div
+                      key={photo.id}
+                      custom={direction}
+                      variants={slideVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={{
+                        x: { type: "spring", stiffness: 300, damping: 30 },
+                        opacity: { duration: 0.2 }
+                      }}
+                      className="absolute inset-0 flex items-center justify-center"
+                    >
+                      <MediaImage
+                        src={photo.blobUrl}
+                        alt={photo.title || "Proofing photo"}
+                        width={photo.width || 1200}
+                        height={photo.height || 800}
+                        className="max-h-[75vh] max-w-full w-auto h-auto object-contain rounded-lg shadow-2xl transition-all duration-300"
+                        priority
+                      />
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
 
                 {/* Left/Right Navigation Arrows */}

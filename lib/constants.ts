@@ -39,7 +39,7 @@ export const CATEGORIES = [
 ] as const;
 
 // ═══ Theme Modes ═══
-export type ThemeMode = "gallery" | "brand";
+export type ThemeMode = "gallery" | "brand" | "light";
 
 export const ROUTE_THEME_MAP: Record<string, ThemeMode> = {
   "/": "brand",

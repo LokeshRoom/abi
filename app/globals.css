@@ -80,6 +80,25 @@
     --neon-text-shadow: 0 0 20px rgba(232, 99, 43, 0.5), 0 0 40px rgba(232, 99, 43, 0.25);
   }
 
+  /* ═══ LIGHT MODE ═══ */
+  [data-theme="light"] {
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #FFF8F5;
+    --bg-card: #F5F0ED;
+    --bg-card-hover: #EDE8E4;
+    --border: rgba(232, 99, 43, 0.2);
+    --border-hover: rgba(232, 99, 43, 0.45);
+    --text-primary: #1A1A1A;
+    --text-secondary: #555555;
+    --text-muted: #999999;
+    --accent: #E8632B;
+    --accent-secondary: #3B5DAA;
+    --accent-glow: rgba(232, 99, 43, 0.15);
+    --accent-glow-strong: rgba(232, 99, 43, 0.3);
+    --overlay-gradient: linear-gradient(135deg, rgba(232, 99, 43, 0.05), rgba(59, 93, 170, 0.03), rgba(168, 216, 65, 0.02));
+    --neon-text-shadow: 0 0 10px rgba(232, 99, 43, 0.2), 0 0 20px rgba(232, 99, 43, 0.1);
+  }
+
   /* ═══ Global Reset & Base ═══ */
   * {
     box-sizing: border-box;
@@ -261,6 +280,10 @@
     -webkit-backdrop-filter: blur(20px) saturate(1.5);
     border: 1px solid rgba(255, 255, 255, 0.06);
   }
+  [data-theme="light"] .glass {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
   .glass-card {
     background: rgba(26, 26, 26, 0.4);
     backdrop-filter: blur(16px);
@@ -268,10 +291,19 @@
     border: 1px solid rgba(255, 255, 255, 0.08);
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
+  [data-theme="light"] .glass-card {
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
   .glass-card:hover {
     background: rgba(30, 30, 30, 0.6);
     border-color: rgba(232, 99, 43, 0.2);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(232, 99, 43, 0.08);
+  }
+  [data-theme="light"] .glass-card:hover {
+    background: rgba(255, 255, 255, 0.6);
+    border-color: rgba(232, 99, 43, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 0 20px rgba(232, 99, 43, 0.08);
   }
 
   /* ═══ 3D Perspective Cards ═══ */

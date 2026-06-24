@@ -16,6 +16,7 @@ interface ThemeContextValue {
   setMode: (mode: ThemeMode) => void;
   isTransitioning: boolean;
   setIsTransitioning: (v: boolean) => void;
+  toggleLight: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
@@ -23,6 +24,7 @@ const ThemeContext = createContext<ThemeContextValue>({
   setMode: () => {},
   isTransitioning: false,
   setIsTransitioning: () => {},
+  toggleLight: () => {},
 });
 
 export function useTheme() {
@@ -43,25 +45,57 @@ function getThemeForPath(pathname: string): ThemeMode {
   return "gallery";
 }
 
+const isPublicRoute = (path: string) => {
+  return !(
+    path.startsWith("/admin") ||
+    path.startsWith("/gallery") ||
+    path === "/login"
+  );
+};
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const [mode, setMode] = useState<ThemeMode>(() => getThemeForPath(pathname));
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  
+  // Initialize mode state.
+  const [mode, setMode] = useState<ThemeMode>(() => getThemeForPath(pathname));
 
   useEffect(() => {
-    const newMode = getThemeForPath(pathname);
-    if (newMode !== mode) {
-      setMode(newMode);
+    setMounted(true);
+    const baseTheme = getThemeForPath(pathname);
+    if (isPublicRoute(pathname)) {
+      const savedTheme = localStorage.getItem("theme-preference");
+      if (savedTheme === "light") {
+        setMode("light");
+      } else {
+        setMode(baseTheme);
+      }
+    } else {
+      setMode(baseTheme);
     }
-  }, [pathname, mode]);
+  }, [pathname]);
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", mode);
-  }, [mode]);
+    if (mounted) {
+      document.documentElement.setAttribute("data-theme", mode);
+    }
+  }, [mode, mounted]);
 
   const handleSetMode = useCallback((newMode: ThemeMode) => {
     setMode(newMode);
+    if (newMode === "light" || newMode === "brand") {
+      localStorage.setItem("theme-preference", newMode);
+    }
   }, []);
+
+  const toggleLight = useCallback(() => {
+    if (!isPublicRoute(pathname)) return;
+    
+    const newTheme = mode === "light" ? "brand" : "light";
+    setMode(newTheme);
+    localStorage.setItem("theme-preference", newTheme);
+  }, [mode, pathname]);
 
   return (
     <ThemeContext.Provider
@@ -70,6 +104,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         setMode: handleSetMode,
         isTransitioning,
         setIsTransitioning,
+        toggleLight,
       }}
     >
       {children}
