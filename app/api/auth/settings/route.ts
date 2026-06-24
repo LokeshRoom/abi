@@ -24,6 +24,13 @@ export async function POST(req: Request) {
     const userId = session.user.id;
     const currentEmail = session.user.email;
 
+    if (!currentEmail) {
+      return NextResponse.json(
+        { error: "User email not found in session" },
+        { status: 400 }
+      );
+    }
+
     // 1. Verify current password by signing in
     const supabase = await createClient();
     const { data: signInData, error: signInError } =

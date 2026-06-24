@@ -460,7 +460,7 @@ export function GalleryClient({ gallery, initialSelections, isSubmitted: initial
               </button>
 
               {/* Photo Area (Left/Main section) */}
-              <div className="flex-1 relative flex items-center justify-center p-6 md:p-12 border-b md:border-b-0 md:border-r border-[var(--border)] min-h-[50vh] md:min-h-0 bg-black/40 overflow-hidden">
+              <div className="flex-1 relative flex items-center justify-center p-6 md:p-12 pb-24 md:pb-24 border-b md:border-b-0 md:border-r border-[var(--border)] min-h-[50vh] md:min-h-0 bg-black/40 overflow-hidden">
                 <div className="relative max-h-[75vh] max-w-[80vw] w-full h-full flex items-center justify-center overflow-hidden">
                   <AnimatePresence initial={false} custom={direction} mode="wait">
                     <motion.div
@@ -504,6 +504,38 @@ export function GalleryClient({ gallery, initialSelections, isSubmitted: initial
                       <ChevronRight size={20} />
                     </button>
                   </>
+                )}
+
+                {/* Thumbnail strip (Carousel) */}
+                {filteredPhotos.length > 1 && (
+                  <div
+                    className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2 max-w-[90%] overflow-x-auto py-2 px-4 rounded-xl bg-black/40 backdrop-blur-md border border-white/10"
+                    style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                  >
+                    {filteredPhotos.map((p, i) => (
+                      <button
+                        key={p.id}
+                        onClick={() => {
+                          setDirection(i > activePhotoIndex ? 1 : -1);
+                          setActivePhotoIndex(i);
+                          setEditingNote(selections[p.id]?.note || "");
+                          setNoteSaved(false);
+                        }}
+                        className={cn(
+                          "h-12 w-12 overflow-hidden rounded-lg transition-all duration-300 shrink-0 cursor-pointer",
+                          i === activePhotoIndex
+                            ? "ring-2 ring-[var(--accent)] scale-110"
+                            : "opacity-50 hover:opacity-80"
+                        )}
+                      >
+                        <img
+                          src={p.blobUrl}
+                          alt={p.title || `Thumbnail ${i + 1}`}
+                          className="h-full w-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
 
