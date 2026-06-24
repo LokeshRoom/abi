@@ -113,15 +113,14 @@ function TiltCard({
           className="object-cover transition-transform duration-700 group-hover:scale-110"
         />
 
-        {/* ═══ Hover overlay with glassmorphism ═══ */}
+        {/* ═══ Hover overlay with glassmorphism — Always visible on mobile, hover-triggered on desktop ═══ */}
         <div
           className={cn(
             "absolute inset-0 flex flex-col justify-end p-6",
-            "opacity-0 transition-all duration-500",
-            "group-hover:opacity-100"
+            "opacity-100 md:opacity-0 transition-all duration-500 md:group-hover:opacity-100"
           )}
           style={{
-            background: "linear-gradient(to top, rgba(10,10,10,0.85) 0%, rgba(10,10,10,0.2) 50%, transparent 100%)",
+            background: "linear-gradient(to top, rgba(10,10,10,0.85) 0%, rgba(10,10,10,0.25) 60%, transparent 100%)",
           }}
         >
           {/* Category badge */}

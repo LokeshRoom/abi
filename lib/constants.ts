@@ -21,6 +21,7 @@ export const SITE = {
 
 // ═══ Navigation ═══
 export const NAV_ITEMS = [
+  { label: "Home", href: "/", mode: "brand" as const },
   { label: "Portfolio", href: "/portfolio", mode: "brand" as const },
   { label: "About", href: "/about", mode: "brand" as const },
   { label: "Blog", href: "/blog", mode: "brand" as const },

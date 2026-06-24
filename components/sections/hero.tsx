@@ -125,9 +125,9 @@ export function Hero() {
       {/* ═══ Floating particles ═══ */}
       <Particles />
 
-      {/* ═══ 3D Photo Canvas (right/background) ═══ */}
+      {/* ═══ 3D Photo Canvas (right/background) — Hidden on mobile for performance & touch scrolling ═══ */}
       <motion.div
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 z-0 hidden md:block"
         style={{ y: canvasY, opacity }}
       >
         <Suspense fallback={null}>

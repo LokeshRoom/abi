@@ -142,7 +142,7 @@ export function CTA() {
             onMouseMove={handleBtnMouseMove}
             onMouseLeave={handleBtnMouseLeave}
             className={cn(
-              "group relative inline-flex items-center gap-3 rounded-full px-12 py-5",
+              "group relative inline-flex items-center gap-3 rounded-full px-6 py-4 sm:px-12 sm:py-5",
               "text-sm font-semibold tracking-wide",
               "transition-shadow duration-500",
               "hover:shadow-[0_0_60px_rgba(232,99,43,0.3),0_0_120px_rgba(232,99,43,0.1)]"

@@ -103,7 +103,7 @@ function TestimonialCard({
         "group flex flex-col justify-between gap-6",
         "rounded-2xl p-8",
         "glass-card",
-        "min-w-[320px] max-w-[420px] shrink-0 snap-center"
+        "w-[85vw] sm:w-[420px] shrink-0 snap-center"
       )}
       style={{
         transform: `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
